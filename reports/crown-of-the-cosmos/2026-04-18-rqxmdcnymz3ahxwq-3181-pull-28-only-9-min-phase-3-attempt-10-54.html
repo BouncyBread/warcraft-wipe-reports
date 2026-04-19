@@ -1,0 +1,2498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Crown of the Cosmos Wipe Analysis</title>
+  <style>:root {
+  --bg: #0f1217;
+  --bg-elev: #1a1f28;
+  --bg-elev-2: #242a35;
+  --text: #e8eaed;
+  --text-dim: #9ba3af;
+  --border: #2d333e;
+  --critical: #d43f3f;
+  --recurring: #e09040;
+  --isolated: #4a7f4a;
+  --accent: #4a9eff;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.container { max-width: 960px; margin: 0 auto; padding: 24px; }
+
+header.report-header {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+}
+header.report-header h1 { margin: 0 0 8px; font-size: 22px; }
+header.report-header .meta { color: var(--text-dim); font-size: 13px; }
+header.report-header .meta a { color: var(--accent); text-decoration: none; }
+header.report-header .meta a:hover { text-decoration: underline; }
+
+section {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+section h2 {
+  margin: 0 0 16px;
+  font-size: 17px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}
+
+.exec-summary ul { margin: 0; padding-left: 20px; }
+.exec-summary li { margin-bottom: 6px; }
+
+.scope-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(74, 158, 255, 0.14);
+  color: #cfe3ff;
+  font-weight: 600;
+}
+
+.scope-mode-specific {
+  background: rgba(74, 158, 255, 0.14);
+}
+
+.scope-mode-default {
+  background: rgba(155, 163, 175, 0.16);
+}
+
+.glossary-list {
+  display: grid;
+  gap: 10px;
+}
+
+.glossary-item {
+  padding: 12px 14px;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.glossary-name {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.glossary-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.mechanic-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(155, 163, 175, 0.16);
+  color: #c8d0db;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: lowercase;
+}
+
+.mechanic-tag-primary {
+  background: rgba(74, 158, 255, 0.18);
+  color: #8cc1ff;
+}
+
+.glossary-summary {
+  color: var(--text-dim);
+}
+
+.glossary-howto {
+  margin-top: 8px;
+  color: var(--text);
+}
+
+.turning-list,
+.cause-mix-list,
+.publish-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.turning-card,
+.cause-mix-row,
+.publish-link {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-elev-2);
+}
+
+.turning-card {
+  padding: 14px 16px;
+}
+
+.turning-card h3 {
+  margin: 6px 0 8px;
+  font-size: 16px;
+}
+
+.turning-meta,
+.cause-mix-count,
+.publish-label {
+  color: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.turning-summary {
+  margin: 0 0 12px;
+}
+
+.turning-mechanics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.turning-chip {
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(74, 158, 255, 0.12);
+  border: 1px solid rgba(74, 158, 255, 0.24);
+}
+
+.cause-mix-row {
+  padding: 12px 14px;
+}
+
+.cause-mix-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.cause-mix-bar {
+  height: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.cause-mix-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), #f0b35f);
+}
+
+.cause-mix-row.severity-critical .cause-mix-bar span {
+  background: linear-gradient(90deg, #ff6b6b, #ffb36b);
+}
+
+.cause-mix-row.severity-recurring .cause-mix-bar span {
+  background: linear-gradient(90deg, #f0b35f, #ffd88a);
+}
+
+.cause-mix-row.severity-isolated .cause-mix-bar span {
+  background: linear-gradient(90deg, #6bcf8c, #a9f0bf);
+}
+
+.cause-mix-notes {
+  margin-top: 8px;
+  color: var(--text-dim);
+}
+
+.publish-link {
+  display: block;
+  padding: 14px 16px;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.publish-link:hover {
+  border-color: var(--accent);
+}
+
+.publish-url {
+  display: block;
+  margin-top: 6px;
+  color: var(--accent);
+  word-break: break-all;
+}
+
+.cause-card {
+  border: 1px solid var(--border);
+  border-left-width: 4px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  background: var(--bg-elev-2);
+  overflow: hidden;
+}
+.cause-card.severity-critical { border-left-color: var(--critical); }
+.cause-card.severity-recurring { border-left-color: var(--recurring); }
+.cause-card.severity-isolated { border-left-color: var(--isolated); }
+
+.cause-card .cause-header {
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+.cause-card .cause-header:hover { background: rgba(255,255,255,0.02); }
+.cause-card .cause-title { font-weight: 600; }
+.cause-card .cause-count {
+  color: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 13px;
+}
+.cause-card .cause-body {
+  padding: 0 16px 16px;
+  border-top: 1px solid var(--border);
+}
+.cause-card[data-collapsed="true"] .cause-body { display: none; }
+
+.death-list {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.death-item {
+  margin-bottom: 14px;
+}
+
+.death-item:last-child {
+  margin-bottom: 0;
+}
+
+.death-context {
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+.diagnosis {
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.diagnosis > div + div {
+  margin-top: 4px;
+}
+
+.classification {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: lowercase;
+}
+
+.classification-mechanic-failure {
+  background: rgba(212, 63, 63, 0.16);
+  color: #ff8f8f;
+}
+
+.classification-healer-throughput-failure {
+  background: rgba(74, 158, 255, 0.16);
+  color: #8cc1ff;
+}
+
+.classification-assignment-soak-failure {
+  background: rgba(224, 144, 64, 0.16);
+  color: #ffc37a;
+}
+
+.classification-unclear-mixed {
+  background: rgba(155, 163, 175, 0.16);
+  color: #c8d0db;
+}
+
+.timeline-row {
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+.timeline-label { color: var(--text-dim); font-family: var(--mono); font-size: 12px; }
+.timeline-bar {
+  position: relative;
+  height: 20px;
+  background: var(--bg-elev-2);
+  border-radius: 3px;
+}
+.timeline-bar .death-marker {
+  position: absolute;
+  top: 2px;
+  width: 3px;
+  height: 16px;
+  background: var(--critical);
+  cursor: help;
+}
+
+.player-row { padding: 8px 0; border-bottom: 1px solid var(--border); }
+.player-row:last-child { border-bottom: none; }
+.player-class-Rogue { color: #fff569; }
+.player-class-Priest { color: #ffffff; }
+.player-class-Mage { color: #3fc7eb; }
+.player-class-Warrior { color: #c69b6d; }
+.player-class-Paladin { color: #f48cba; }
+.player-class-Hunter { color: #aad372; }
+.player-class-Warlock { color: #8788ee; }
+.player-class-Druid { color: #ff7c0a; }
+.player-class-Shaman { color: #0070dd; }
+.player-class-DeathKnight { color: #c41e3a; }
+.player-class-DemonHunter { color: #a330c9; }
+.player-class-Monk { color: #00ff98; }
+.player-class-Evoker { color: #33937f; }
+
+.ability { font-family: var(--mono); }
+.timestamp { font-family: var(--mono); color: var(--text-dim); }
+
+footer.report-footer {
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 12px;
+  margin-top: 24px;
+}
+
+.strategy-guide {
+  margin: 28px 0;
+}
+
+.strategy-overview {
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.strategy-block {
+  margin-top: 18px;
+}
+
+.strategy-phase-list,
+.strategy-diagram-list {
+  display: grid;
+  gap: 16px;
+}
+
+.strategy-phase-card,
+.strategy-diagram-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.strategy-diagram {
+  width: 100%;
+  max-width: 420px;
+  margin-top: 12px;
+}
+
+.strategy-diagram-caption {
+  color: var(--text-dim);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.strategy-phase-card h4 {
+  margin: 0 0 10px;
+  font-size: 15px;
+}
+
+.strategy-phase-card p,
+.strategy-phase-card ul {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.strategy-phase-card p:last-child,
+.strategy-phase-card ul:last-child {
+  margin-bottom: 0;
+}
+
+.strategy-phase-card ul {
+  padding-left: 20px;
+}
+
+.diagram-room {
+  fill: rgba(255, 255, 255, 0.03);
+  stroke: rgba(255, 255, 255, 0.18);
+  stroke-width: 1.5;
+}
+
+.diagram-zone {
+  fill: rgba(104, 168, 255, 0.10);
+  stroke: rgba(104, 168, 255, 0.35);
+  stroke-width: 0.8;
+}
+
+.diagram-arrow {
+  stroke: rgba(255, 203, 107, 0.85);
+  stroke-width: 1.5;
+}
+
+.diagram-label {
+  fill: var(--text-dim);
+  font-size: 4px;
+  text-anchor: middle;
+}
+
+.diagram-entity {
+  fill: rgba(255, 255, 255, 0.92);
+}
+
+.diagram-entity-boss {
+  fill: rgba(255, 123, 123, 0.92);
+}
+</style>
+</head>
+<body>
+  <div class="container">
+    
+
+    
+
+    <header class="report-header">
+      <h1>Crown of the Cosmos &middot; Heroic</h1>
+      <div class="meta">
+        Voidspire Heroic &middot; 2026-04-18 &middot;
+        24 wipes &middot;
+        Best: 10.5% fight remaining
+          (boss at 37.7% HP) &middot;
+        Avg wipe: 9:03
+        <br>
+        Source: <a href="https://www.warcraftlogs.com/reports/RqxmdCnyMZ3AhXWQ">https://www.warcraftlogs.com/reports/RqxmdCnyMZ3AhXWQ</a>
+      </div>
+    </header>
+
+    <section class="exec-summary">
+      <h2>Summary</h2>
+      <ul>
+        
+        <li>Pull 28 was the deepest attempt of the session — ~89.5% of the way through the fight, Alleria at 37.67% HP (9-minute pull). The raid reached Phase 3 and collapsed in a tether-break cascade between 8:01 and 8:38.</li>
+        
+        <li>Root cause: Aspect of the End tethers are not being broken in the correct Ranged → Melee → Tank order, stacking 300% physical damage debuffs. Gravity Collapse then becomes lethal and Voidstalker Sting finishes whoever is already low.</li>
+        
+        <li>Voidstalker Sting is NOT the real problem on Heroic — Sting is a 25s DoT that&#39;s manageable with standard healing. The 7 Sting-logged deaths are people who were already broken by the tether cascade; Sting just landed the final blow.</li>
+        
+        <li>Dark Rush feathers were being taken correctly (they are REQUIRED in Phase 3 to glide between slices before Devouring Cosmos covers them). Do not change that behavior — the issue is tether order and Grasp beam dodging, not feather usage.</li>
+        
+        <li>Five deaths around 6:38-6:58 had no logged killing blow and cluster at the Intermission 2 / Phase 3 transition. Most likely Orbiting Matter bolt hits or failed slice jumps.</li>
+        
+        <li>Analysis scope: only pull 28. Cross-pull claims are not made here.</li>
+        
+      </ul>
+    </section>
+
+    
+    <section class="analysis-scope">
+      <h2>Analysis scope</h2>
+      <div class="scope-badge scope-mode-specific">Pull 28 only (9-min Phase 3 attempt, 10.54%)</div>
+    </section>
+    
+
+    
+    <section class="strategy-guide">
+      <h2>Simple strategy</h2>
+      
+      <p class="strategy-overview">Crown of the Cosmos Heroic is a three-phase fight against Alleria with two intermissions. Phase 3 is where almost every Heroic raid wipes: Aspect of the End tethers must be broken in the right order, and the raid must glide to the next platform slice before Devouring Cosmos covers the current one.</p>
+      
+
+      
+      <div class="strategy-block">
+        <h3>Fight plan</h3>
+        <ul>
+          
+          <li>Phase 1: interrupt every Void Barrage cast. Heal through Voidstalker Sting; it drops off on its own.</li>
+          
+          <li>Intermission 1 / Phase 2: burn the Rift Simulacrum&#39;s Cosmic Barrier. Ranged bait Void Expulsion puddles on the fissure edge.</li>
+          
+          <li>Intermission 2: stand still in your assigned slice during the Orbiting Matter / 300% arrow window — moving is what kills people here.</li>
+          
+          <li>Phase 3 (62%): Aspect tethers break in order Ranged → Melee → Tank, from 30+ yards apart.</li>
+          
+          <li>Phase 3: pick up a cosmic feather EVERY time Devouring Cosmos is about to cover your slice and glide to the next one.</li>
+          
+          <li>Phase 3: when Grasp of Emptiness anchors you, dodge the beam on expiration — move the whole group as a unit.</li>
+          
+          <li>Do NOT dispel Null Corona. Heal through it. Dispel jumps the absorb to a new player.</li>
+          
+        </ul>
+      </div>
+      
+
+      
+      <div class="strategy-block">
+        <h3>Phase plan</h3>
+        <div class="strategy-phase-list">
+          
+          <article class="strategy-phase-card">
+            <h4>Phase 1 — The Courtyard</h4>
+            <p>Tank-split on Vorelus and Demair, interrupt adds, bait Void Expulsion away from the group.</p>
+            <p><strong>Positioning:</strong> One tank solos Vorelus at its portal, the rest of the raid stacks on Demair. Ranged play slightly outside the stack to bait Void Expulsion puddles away.</p>
+            <p><strong>Assignments:</strong> Fixed Void Barrage interrupt rotation on Undying Voidspawn — if a cast completes, the add becomes unkillable. Silverstrike Arrows hit each Sentinel once; do not double-hit or you reset stacks.</p>
+            <p><strong>Movement:</strong> Drop Void Remnants pools away from melee. Move through Silverstrike Arrows to cleanse Sting if it is piling up.</p>
+          </article>
+          
+          <article class="strategy-phase-card">
+            <h4>Intermission 1 / Phase 2 — The Severed Rift</h4>
+            <p>Break the Rift Simulacrum&#39;s Cosmic Barrier, manage Phase 2 ricocheting arrows, keep the group rotating along the fissure edge.</p>
+            <p><strong>Positioning:</strong> Stack near the outer fissure boundary of your slice. Rotate counter-clockwise when puddles run out of space.</p>
+            <p><strong>Assignments:</strong> Healers commit a raid cooldown for the Cosmic Barrier duration — it is a damage window, not healable ambient. Ranged continue baiting Void Expulsion near existing puddles to keep lanes clean.</p>
+            <p><strong>Movement:</strong> Stay out of the ricochet path of Phase 2 Silverstrike Arrows. Finish the Barrier burn before Phase 3 opens at 62%.</p>
+          </article>
+          
+          <article class="strategy-phase-card">
+            <h4>Intermission 2 — Orbiting Matter</h4>
+            <p>Stand still during the 300% arrow damage window and rotate slices to dodge Orbiting Matter bolts.</p>
+            <p><strong>Positioning:</strong> Stay centered in your assigned platform slice. Rotate slice only when the Orbiting Matter pattern requires it.</p>
+            <p><strong>Assignments:</strong> Healers pre-shield: moving into Orbiting Matter during the 300% debuff is lethal.</p>
+            <p><strong>Movement:</strong> DO NOT move during the 300% arrow damage debuff window — that is the primary kill case here.</p>
+          </article>
+          
+          <article class="strategy-phase-card">
+            <h4>Phase 3 — The End of the End (62% → 0%)</h4>
+            <p>Tether-break order, feather gliding, and Grasp dodging are the whole phase. Sting and raid damage are side effects.</p>
+            <p><strong>Positioning:</strong> Raid stacks on Alleria by default. Aspect tether targets spread 30+ yards before breaking — Ranged first, then Melee, then Tank.</p>
+            <p><strong>Assignments:</strong> Call the tether break order out loud each time: &#39;RANGED now, MELEE now, TANK now.&#39; Assign a feather pickup target each Devouring Cosmos cycle — nobody should be standing in the covered slice. Healers DO NOT dispel Null Corona. Heal through it.</p>
+            <p><strong>Movement:</strong> Grab a Dark Rush feather every Devouring Cosmos and glide to the next slice. Grasp of Emptiness: move as a group away from the beam lanes when the anchor expires. Aspect tether breaks happen from 30+ yards, never stacked.</p>
+          </article>
+          
+        </div>
+      </div>
+      
+
+      
+      <div class="strategy-block">
+        <h3>Big mistakes to avoid</h3>
+        <ul>
+          
+          <li>Breaking Aspect tethers simultaneously or in the wrong order — this stacks 300% physical damage and turns Gravity Collapse into a raid wipe.</li>
+          
+          <li>Staying on a slice after Devouring Cosmos starts covering it — the slice becomes a no-heal zone.</li>
+          
+          <li>Dispelling Null Corona — the absorb jumps to someone else and usually lands on a target with no cooldowns.</li>
+          
+          <li>Moving during the Intermission 2 300% arrow damage debuff — arrows become lethal.</li>
+          
+          <li>Letting Void Barrage casts complete in Phase 1/2 — adds become unkillable and deal massive damage.</li>
+          
+          <li>Treating Voidstalker Sting as a critical kill mechanic — on Heroic it is healable. Spending CDs on Sting steals them from the real overlaps.</li>
+          
+        </ul>
+      </div>
+      
+
+      
+      <div class="strategy-block">
+        <h3>How your log differed</h3>
+        <ul>
+          
+          <li>The 8:01 double-death (Coltenqwe + Mcnuggs, both to Gravity Collapse) marks the first tether-break cascade of the pull. Two players dying to one Collapse hit points at an out-of-order or too-close tether break.</li>
+          
+          <li>Between 8:30 and 8:38 the raid took eight deaths. Seven are logged as Voidstalker Sting killing blows, but Sting is a 25s DoT — those players were already at very low HP from the tether-cascade raid damage. Fixing tether order fixes those deaths, not pre-healing Sting.</li>
+          
+          <li>The 9:01 Grasp of Emptiness double-death (Zoeìe + Skidouche) is a beam-dodge failure on anchor expiration. The group did not reposition as a unit when Grasp expired.</li>
+          
+          <li>Five unlogged deaths at 6:38-6:58 cluster on the Intermission 2 / Phase 3 transition. Most likely these are Orbiting Matter hits during the 300% debuff window or missed feather pickups into Devouring Cosmos.</li>
+          
+        </ul>
+      </div>
+      
+
+      
+      <div class="strategy-block">
+        <h3>Positioning diagrams</h3>
+        <div class="strategy-diagram-list">
+          
+          <figure class="strategy-diagram-card">
+        <figcaption>
+          <strong>Phase 3 — Aspect tether break order</strong>
+          <div class="strategy-diagram-caption">Spread to 30+ yards, break in order: Ranged, then Melee, then Tank.</div>
+        </figcaption>
+        <svg class="strategy-diagram" viewBox="0 0 100 100" role="img" aria-label="Phase 3 — Aspect tether break order">
+          
+          <circle cx="50" cy="50" r="42" class="diagram-room" />
+          
+          
+          <rect x="12.0" y="42.0" width="16" height="16" class="diagram-zone" />
+          <text x="20" y="50" class="diagram-label">Break zone</text>
+          
+          <rect x="42.0" y="64.0" width="16" height="16" class="diagram-zone" />
+          <text x="50" y="72" class="diagram-label">Break zone</text>
+          
+          <rect x="42.0" y="20.0" width="16" height="16" class="diagram-zone" />
+          <text x="50" y="28" class="diagram-label">Break zone</text>
+          
+          
+          <line x1="50" y1="50" x2="20" y2="50" class="diagram-arrow" />
+          <text x="20" y="47" class="diagram-label">1st</text>
+          
+          <line x1="50" y1="50" x2="50" y2="72" class="diagram-arrow" />
+          <text x="50" y="69" class="diagram-label">2nd</text>
+          
+          <line x1="50" y1="50" x2="50" y2="28" class="diagram-arrow" />
+          <text x="50" y="25" class="diagram-label">3rd</text>
+          
+          
+          <circle cx="50" cy="50" r="3.2" class="diagram-entity diagram-entity-boss" />
+          <text x="50" y="57" class="diagram-label">Alleria</text>
+          
+          <circle cx="50" cy="28" r="3.2" class="diagram-entity diagram-entity-tank" />
+          <text x="50" y="35" class="diagram-label">Tank (3rd)</text>
+          
+          <circle cx="50" cy="72" r="3.2" class="diagram-entity diagram-entity-melee" />
+          <text x="50" y="79" class="diagram-label">Melee (2nd)</text>
+          
+          <circle cx="20" cy="50" r="3.2" class="diagram-entity diagram-entity-ranged" />
+          <text x="20" y="57" class="diagram-label">Ranged (1st)</text>
+          
+        </svg>
+      </figure>
+          
+          <figure class="strategy-diagram-card">
+        <figcaption>
+          <strong>Phase 3 — Devouring Cosmos slice jump</strong>
+          <div class="strategy-diagram-caption">Grab a feather and glide to the next slice before the current one is covered.</div>
+        </figcaption>
+        <svg class="strategy-diagram" viewBox="0 0 100 100" role="img" aria-label="Phase 3 — Devouring Cosmos slice jump">
+          
+          <circle cx="50" cy="50" r="42" class="diagram-room" />
+          
+          
+          <rect x="5.0" y="60.0" width="40" height="30" class="diagram-zone" />
+          <text x="25" y="75" class="diagram-label">Covered slice</text>
+          
+          <rect x="60.0" y="10.0" width="30" height="30" class="diagram-zone" />
+          <text x="75" y="25" class="diagram-label">Next slice</text>
+          
+          
+          <line x1="30" y1="55" x2="75" y2="25" class="diagram-arrow" />
+          <text x="75" y="22" class="diagram-label">Glide with feather</text>
+          
+          
+          <circle cx="50" cy="50" r="3.2" class="diagram-entity diagram-entity-boss" />
+          <text x="50" y="57" class="diagram-label">Alleria</text>
+          
+          <circle cx="30" cy="55" r="3.2" class="diagram-entity diagram-entity-ranged" />
+          <text x="30" y="62" class="diagram-label">Raid</text>
+          
+          <circle cx="68" cy="30" r="3.2" class="diagram-entity diagram-entity-melee" />
+          <text x="68" y="37" class="diagram-label">Feather</text>
+          
+        </svg>
+      </figure>
+          
+        </div>
+      </div>
+      
+    </section>
+    
+
+    
+    <section class="mechanic-glossary">
+      <h2>Mechanic glossary</h2>
+      <div class="glossary-list">
+        
+        <div class="glossary-item">
+          <div class="glossary-name ability">Aspect of the End</div>
+          
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">tether</span>
+        
+        <span class="mechanic-tag">assignment</span>
+        
+        <span class="mechanic-tag">phase-3</span>
+        
+      </div>
+      
+          <div class="glossary-summary">Tethers one tank, one melee, and one ranged player to obelisks. Breaking a tether fires Gravity Collapse. Break order matters: Ranged → Melee → Tank.</div>
+          
+          <div class="glossary-howto"><strong>How to handle:</strong> Call the break order every cast. Tethered players move 30+ yards apart before pulling. Do NOT break simultaneously.</div>
+          
+        </div>
+        
+        <div class="glossary-item">
+          <div class="glossary-name ability">Gravity Collapse</div>
+          
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">raid-wide</span>
+        
+        <span class="mechanic-tag">debuff</span>
+        
+        <span class="mechanic-tag">phase-3</span>
+        
+      </div>
+      
+          <div class="glossary-summary">Raid-wide damage fired when an Aspect tether breaks, plus a 300% increased physical damage taken debuff on the breaker. Stacking debuffs is what snowballs into wipes.</div>
+          
+          <div class="glossary-howto"><strong>How to handle:</strong> The fix is tether order and spacing, not pre-healing. If breaks are clean, Collapse is survivable.</div>
+          
+        </div>
+        
+        <div class="glossary-item">
+          <div class="glossary-name ability">Voidstalker Sting</div>
+          
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">dot</span>
+        
+        <span class="mechanic-tag">random-target</span>
+        
+      </div>
+      
+          <div class="glossary-summary">25-second Void DoT on random targets. On Heroic, Method&#39;s guide calls it &#39;manageable with standard healing.&#39; No stack removal — let it drop off naturally.</div>
+          
+          <div class="glossary-howto"><strong>How to handle:</strong> Heal through it. If Sting is &#39;killing&#39; players, the real cause is another overlap already in progress.</div>
+          
+        </div>
+        
+        <div class="glossary-item">
+          <div class="glossary-name ability">Grasp of Emptiness</div>
+          
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">tether</span>
+        
+        <span class="mechanic-tag">dodge</span>
+        
+        <span class="mechanic-tag">phase-3</span>
+        
+      </div>
+      
+          <div class="glossary-summary">Obelisk anchor for 8 seconds, then beam attacks fire on expiration.</div>
+          
+          <div class="glossary-howto"><strong>How to handle:</strong> The whole group repositions as a unit away from obelisk beam lanes when Grasp expires. Dodge the beams.</div>
+          
+        </div>
+        
+        <div class="glossary-item">
+          <div class="glossary-name ability">Bursting Emptiness</div>
+          
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">backlash</span>
+        
+        <span class="mechanic-tag">phase-3</span>
+        
+      </div>
+      
+          <div class="glossary-summary">The damage pulse when Grasp of Emptiness expires. Hits players still in the beam lane.</div>
+          
+          <div class="glossary-howto"><strong>How to handle:</strong> This is the follow-up to Grasp. Fix the Grasp dodge, Bursting Emptiness solves itself.</div>
+          
+        </div>
+        
+        <div class="glossary-item">
+          <div class="glossary-name ability">Dark Rush</div>
+          
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">buff</span>
+        
+        <span class="mechanic-tag">required</span>
+        
+        <span class="mechanic-tag">phase-3</span>
+        
+      </div>
+      
+          <div class="glossary-summary">Cosmic-feather pickup that grants a 12-second glide buff. REQUIRED in Phase 3 to jump between platform slices before Devouring Cosmos covers the current slice.</div>
+          
+          <div class="glossary-howto"><strong>How to handle:</strong> Pick feathers up every Devouring Cosmos cycle. Warlock Gateway and DH leaps are backups but feathers are the intended play.</div>
+          
+        </div>
+        
+        <div class="glossary-item">
+          <div class="glossary-name ability">Devouring Cosmos</div>
+          
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">ground</span>
+        
+        <span class="mechanic-tag">no-heal</span>
+        
+        <span class="mechanic-tag">phase-3</span>
+        
+      </div>
+      
+          <div class="glossary-summary">Covers the current platform slice in a puddle that deals heavy damage and prevents healing.</div>
+          
+          <div class="glossary-howto"><strong>How to handle:</strong> Leave the slice before it finishes spawning. Grab a feather and glide to the next slice.</div>
+          
+        </div>
+        
+        <div class="glossary-item">
+          <div class="glossary-name ability">Void Barrage</div>
+          
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">interrupt</span>
+        
+        <span class="mechanic-tag">adds</span>
+        
+      </div>
+      
+          <div class="glossary-summary">Cast by Undying Voidspawn in Phase 1/2. If it completes, adds become unkillable and deal massive damage.</div>
+          
+          <div class="glossary-howto"><strong>How to handle:</strong> Assign a hard interrupt rotation. A missed interrupt is a wipe setup, not a healable event.</div>
+          
+        </div>
+        
+        <div class="glossary-item">
+          <div class="glossary-name ability">Null Corona</div>
+          
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">absorb/heal</span>
+        
+        <span class="mechanic-tag">do-not-dispel</span>
+        
+      </div>
+      
+          <div class="glossary-summary">Large heal absorb on a player. Dispelling jumps the remaining absorb to a new player, usually someone worse positioned.</div>
+          
+          <div class="glossary-howto"><strong>How to handle:</strong> Heal through it. DO NOT dispel.</div>
+          
+        </div>
+        
+        <div class="glossary-item">
+          <div class="glossary-name ability">Cosmic Barrier</div>
+          
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">absorb/raid-wide</span>
+        
+        <span class="mechanic-tag">burn-window</span>
+        
+        <span class="mechanic-tag">phase-2</span>
+        
+      </div>
+      
+          <div class="glossary-summary">Large absorb on the Rift Simulacrum. While active, raid takes ambient damage.</div>
+          
+          <div class="glossary-howto"><strong>How to handle:</strong> Burn it down. Healers commit a raid CD for the duration.</div>
+          
+        </div>
+        
+        <div class="glossary-item">
+          <div class="glossary-name ability">Void Remnants</div>
+          
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">ground</span>
+        
+        <span class="mechanic-tag">damage-over-time</span>
+        
+      </div>
+      
+          <div class="glossary-summary">Ground puddles dropped by adds / Rift Simulacrum. Ticks hard if stood in.</div>
+          
+          <div class="glossary-howto"><strong>How to handle:</strong> Drop puddles on the fissure edge, never through the melee stack.</div>
+          
+        </div>
+        
+      </div>
+    </section>
+    
+
+    
+    <section class="turning-moments">
+      <h2>Turning moments</h2>
+      <div class="turning-list">
+        
+        <article class="turning-card">
+          <div class="turning-meta">Pull 28 &middot; 8:01</div>
+          <h3>First tether-break cascade</h3>
+          <p class="turning-summary">Coltenqwe and Mcnuggs both die to Gravity Collapse in the same beat — the first Aspect tether break of the pull landed too close or in the wrong order.</p>
+          
+          <div class="turning-mechanics">
+            
+            <span class="turning-chip ability">Aspect of the End</span>
+            
+            <span class="turning-chip ability">Gravity Collapse</span>
+            
+          </div>
+          
+          
+          <p><strong>Impact:</strong> 2 deaths; every following tether break had stacked physical damage debuffs</p>
+          
+          
+          <p><strong>Why it mattered:</strong> Gravity Collapse applies 300% increased physical damage taken. One bad break in Phase 3 means the next break is often fatal.</p>
+          
+        </article>
+        
+        <article class="turning-card">
+          <div class="turning-meta">Pull 28 &middot; 8:30-8:38</div>
+          <h3>Tether-cascade wipe window</h3>
+          <p class="turning-summary">Eight deaths in eight seconds. Seven are logged as Voidstalker Sting, but the root cause is raid damage from stacked Gravity Collapse debuffs finally killing everyone below 50% HP.</p>
+          
+          <div class="turning-mechanics">
+            
+            <span class="turning-chip ability">Aspect of the End</span>
+            
+            <span class="turning-chip ability">Gravity Collapse</span>
+            
+            <span class="turning-chip ability">Voidstalker Sting</span>
+            
+          </div>
+          
+          
+          <p><strong>Impact:</strong> 8 deaths — the pull is effectively over</p>
+          
+          
+          <p><strong>Why it mattered:</strong> This is the classic Phase 3 Heroic wipe signature. The fix is tether order and spacing, not Sting healing.</p>
+          
+        </article>
+        
+        <article class="turning-card">
+          <div class="turning-meta">Pull 28 &middot; 9:01</div>
+          <h3>Grasp of Emptiness beam dodge failure</h3>
+          <p class="turning-summary">Zoeìe (priest) and Skidouche (monk) die to Grasp of Emptiness beams on anchor expiration.</p>
+          
+          <div class="turning-mechanics">
+            
+            <span class="turning-chip ability">Grasp of Emptiness</span>
+            
+            <span class="turning-chip ability">Bursting Emptiness</span>
+            
+          </div>
+          
+          
+          <p><strong>Impact:</strong> 2 deaths + priest lost during the tail</p>
+          
+          
+          <p><strong>Why it mattered:</strong> The group did not reposition as a unit when Grasp expired. On Heroic, Grasp is a mid-difficulty dodge check — missing it kills anyone in the beam lane.</p>
+          
+        </article>
+        
+      </div>
+    </section>
+    
+
+    <section class="cause-mix">
+      <h2>Cause mix</h2>
+      
+      <div class="cause-mix-list">
+        
+        <div class="cause-mix-row severity-critical">
+          <div class="cause-mix-header">
+            <span class="ability">Gravity Collapse (tether-break cascade)</span>
+            <span class="cause-mix-count">12 deaths</span>
+          </div>
+          <div class="cause-mix-bar">
+            <span style="width: 100.0%;"></span>
+          </div>
+          
+          <div class="cause-mix-notes">5 deaths logged as Gravity Collapse killing blows (8:01-8:37) PLUS 7 deaths logged as Voidstalker Sting in the same 8:30-8:38 window. The Sting deaths are the tether cascade in disguise — players were already broken by stacked Collapse debuffs when Sting ticked them down. Real attributable deaths to this root cause: 12.</div>
+          
+        </div>
+        
+        <div class="cause-mix-row severity-recurring">
+          <div class="cause-mix-header">
+            <span class="ability">Grasp of Emptiness beams</span>
+            <span class="cause-mix-count">3 deaths</span>
+          </div>
+          <div class="cause-mix-bar">
+            <span style="width: 25.0%;"></span>
+          </div>
+          
+          <div class="cause-mix-notes">Three deaths at 8:04 and 9:01 on anchor expiration. All three were in the beam lane when Grasp expired. This is a &#39;reposition as a group&#39; failure, not a positional assignment issue.</div>
+          
+        </div>
+        
+        <div class="cause-mix-row severity-isolated">
+          <div class="cause-mix-header">
+            <span class="ability">Void Remnants (Phase 2)</span>
+            <span class="cause-mix-count">1 death</span>
+          </div>
+          <div class="cause-mix-bar">
+            <span style="width: 8.333333333333332%;"></span>
+          </div>
+          
+          <div class="cause-mix-notes">One Phase-2 death at 4:44 during Cosmic Barrier burn. Everyone else cleared Phase 2 cleanly.</div>
+          
+        </div>
+        
+        <div class="cause-mix-row severity-isolated">
+          <div class="cause-mix-header">
+            <span class="ability">Devouring Cosmos</span>
+            <span class="cause-mix-count">1 death</span>
+          </div>
+          <div class="cause-mix-bar">
+            <span style="width: 8.333333333333332%;"></span>
+          </div>
+          
+          <div class="cause-mix-notes">One death at 9:02 on the final slice transition. Likely Diesl did not pick up a feather.</div>
+          
+        </div>
+        
+        <div class="cause-mix-row severity-recurring">
+          <div class="cause-mix-header">
+            <span class="ability">Unlogged killing blows (Intermission 2 / transition)</span>
+            <span class="cause-mix-count">5 deaths</span>
+          </div>
+          <div class="cause-mix-bar">
+            <span style="width: 41.66666666666667%;"></span>
+          </div>
+          
+          <div class="cause-mix-notes">Five deaths cluster at 6:38-6:58 (the Intermission 2 / Phase 3 transition). Most likely Orbiting Matter bolt hits during the 300% arrow damage debuff window, or missed slice jumps into Devouring Cosmos.</div>
+          
+        </div>
+        
+      </div>
+    </section>
+
+    <section class="top-causes">
+      <h2>Top death causes</h2>
+      
+      
+        <div class="cause-card severity-critical" data-collapsed="false">
+          <div class="cause-header" onclick="toggleCard(this)">
+            <div>
+              <span class="cause-title"><span class="ability">Gravity Collapse (tether-break cascade)</span></span>
+              <div style="font-size: 12px; color: var(--text-dim); margin-top: 4px;">
+                Pulls: 28
+              </div>
+            </div>
+            <div class="cause-count">12 deaths</div>
+          </div>
+          <div class="cause-body">
+            
+            <p><strong>Mechanic:</strong> Raid-wide damage fired when Aspect of the End tethers break. Each break applies a 300% increased physical damage taken debuff. Breaking tethers out of order (or simultaneously) stacks the debuff and makes the next Collapse fatal.</p>
+            
+            
+            <p><strong>Pattern:</strong> 5 deaths logged as Gravity Collapse killing blows (8:01-8:37) PLUS 7 deaths logged as Voidstalker Sting in the same 8:30-8:38 window. The Sting deaths are the tether cascade in disguise — players were already broken by stacked Collapse debuffs when Sting ticked them down. Real attributable deaths to this root cause: 12.</p>
+            
+            
+            <p><strong>Individual deaths:</strong></p>
+            <ul class="death-list">
+              
+              <li class="death-item">
+                <div>
+                  <span class="player-class-Warlock">Coltenqwe</span>
+                  <span class="timestamp">&middot; Pull 28 &middot; 8:01</span>
+                </div>
+                <div class="death-context">First Aspect tether break of the pull.</div>
+                
+                <div class="diagnosis">
+                  
+                  <div><strong>Killing blow:</strong> <span class="ability">Gravity Collapse</span></div>
+                  
+                  
+                  <div><strong>Likely root cause:</strong> Tether broke out of order or inside 30 yards of the raid.</div>
+                  
+                  
+                  <div><strong>Classification:</strong> <span class="classification classification-mechanic-failure">mechanic failure</span></div>
+                  
+                  
+                  <div><strong>Why:</strong> Two players dying on the same Collapse hit is the tell-tale signature of a bad break.</div>
+                  
+                </div>
+                
+              </li>
+              
+              <li class="death-item">
+                <div>
+                  <span class="player-class-Shaman">Mcnuggs</span>
+                  <span class="timestamp">&middot; Pull 28 &middot; 8:01</span>
+                </div>
+                <div class="death-context">Same beat as Coltenqwe.</div>
+                
+                <div class="diagnosis">
+                  
+                  <div><strong>Killing blow:</strong> <span class="ability">Gravity Collapse</span></div>
+                  
+                  
+                  <div><strong>Likely root cause:</strong> Caught in the Collapse splash from the bad break.</div>
+                  
+                  
+                  <div><strong>Classification:</strong> <span class="classification classification-mechanic-failure">mechanic failure</span></div>
+                  
+                  
+                  <div><strong>Why:</strong> Spacing was still raid-stack when the first Collapse landed.</div>
+                  
+                </div>
+                
+              </li>
+              
+              <li class="death-item">
+                <div>
+                  <span class="player-class-Druid">Onetreehealz</span>
+                  <span class="timestamp">&middot; Pull 28 &middot; 8:04</span>
+                </div>
+                <div class="death-context">Dark Rush and Grasp of Emptiness ticks in the window.</div>
+                
+                <div class="diagnosis">
+                  
+                  <div><strong>Killing blow:</strong> <span class="ability">Gravity Collapse</span></div>
+                  
+                  
+                  <div><strong>Likely root cause:</strong> Healer was mid-feather/tether management when Collapse landed.</div>
+                  
+                  
+                  <div><strong>Classification:</strong> <span class="classification classification-assignment-soak-failure">assignment/soak failure</span></div>
+                  
+                  
+                  <div><strong>Why:</strong> Feather pickup and Grasp response competed with Collapse spacing — healer got caught.</div>
+                  
+                </div>
+                
+              </li>
+              
+              <li class="death-item">
+                <div>
+                  <span class="player-class-Mage">Sawyare</span>
+                  <span class="timestamp">&middot; Pull 28 &middot; 8:37</span>
+                </div>
+                <div class="death-context">Stacked with Tunasat.</div>
+                
+                <div class="diagnosis">
+                  
+                  <div><strong>Killing blow:</strong> <span class="ability">Gravity Collapse</span></div>
+                  
+                  
+                  <div><strong>Likely root cause:</strong> Second tether-break cascade; physical damage debuffs already stacked.</div>
+                  
+                  
+                  <div><strong>Classification:</strong> <span class="classification classification-mechanic-failure">mechanic failure</span></div>
+                  
+                  
+                  <div><strong>Why:</strong> Two mages in the same Collapse splash — positioning cluster failure.</div>
+                  
+                </div>
+                
+              </li>
+              
+              <li class="death-item">
+                <div>
+                  <span class="player-class-Mage">Tunasat</span>
+                  <span class="timestamp">&middot; Pull 28 &middot; 8:37</span>
+                </div>
+                <div class="death-context">Stacked with Sawyare.</div>
+                
+                <div class="diagnosis">
+                  
+                  <div><strong>Killing blow:</strong> <span class="ability">Gravity Collapse</span></div>
+                  
+                  
+                  <div><strong>Likely root cause:</strong> Same Collapse splash.</div>
+                  
+                  
+                  <div><strong>Classification:</strong> <span class="classification classification-mechanic-failure">mechanic failure</span></div>
+                  
+                  
+                  <div><strong>Why:</strong> Twin deaths on one Collapse confirm bad break + bad spacing.</div>
+                  
+                </div>
+                
+              </li>
+              
+              <li class="death-item">
+                <div>
+                  <span class="player-class-Monk">Towongfoo</span>
+                  <span class="timestamp">&middot; Pull 28 &middot; 7:47</span>
+                </div>
+                <div class="death-context">First Sting/Collapse overlap of the pull.</div>
+                
+                <div class="diagnosis">
+                  
+                  <div><strong>Killing blow:</strong> <span class="ability">Voidstalker Sting</span></div>
+                  
+                  
+                  <div><strong>Likely root cause:</strong> Broken HP buffer from the approaching tether cascade made a DoT lethal.</div>
+                  
+                  
+                  <div><strong>Classification:</strong> <span class="classification classification-healer-throughput-failure">healer/throughput failure</span></div>
+                  
+                  
+                  <div><strong>Why:</strong> Sting alone is not a kill mechanic on Heroic. Monk was low going in.</div>
+                  
+                </div>
+                
+              </li>
+              
+              <li class="death-item">
+                <div>
+                  <span class="player-class-Shaman">Zappinuraw</span>
+                  <span class="timestamp">&middot; Pull 28 &middot; 8:30</span>
+                </div>
+                <div class="death-context">Cascade window.</div>
+                
+                <div class="diagnosis">
+                  
+                  <div><strong>Killing blow:</strong> <span class="ability">Voidstalker Sting</span></div>
+                  
+                  
+                  <div><strong>Likely root cause:</strong> Raid damage from the stacked Collapse debuffs; Sting was the finisher.</div>
+                  
+                  
+                  <div><strong>Classification:</strong> <span class="classification classification-mechanic-failure">mechanic failure</span></div>
+                  
+                  
+                  <div><strong>Why:</strong> Logged as Sting but the real driver is the unchecked tether cascade.</div>
+                  
+                </div>
+                
+              </li>
+              
+              <li class="death-item">
+                <div>
+                  <span class="player-class-Hunter">Huntermehv</span>
+                  <span class="timestamp">&middot; Pull 28 &middot; 8:33</span>
+                </div>
+                <div class="death-context">Cascade window.</div>
+                
+                <div class="diagnosis">
+                  
+                  <div><strong>Killing blow:</strong> <span class="ability">Voidstalker Sting</span></div>
+                  
+                  
+                  <div><strong>Likely root cause:</strong> Same cascade — health pool was already spent before Sting&#39;s final tick.</div>
+                  
+                  
+                  <div><strong>Classification:</strong> <span class="classification classification-mechanic-failure">mechanic failure</span></div>
+                  
+                  
+                  <div><strong>Why:</strong> Heroic Sting does not kill healthy players; this was a cascade death.</div>
+                  
+                </div>
+                
+              </li>
+              
+              <li class="death-item">
+                <div>
+                  <span class="player-class-Warlock">Aluu</span>
+                  <span class="timestamp">&middot; Pull 28 &middot; 8:33</span>
+                </div>
+                <div class="death-context">Grasp of Emptiness in the window.</div>
+                
+                <div class="diagnosis">
+                  
+                  <div><strong>Killing blow:</strong> <span class="ability">Voidstalker Sting</span></div>
+                  
+                  
+                  <div><strong>Likely root cause:</strong> Cascade + Grasp proximity.</div>
+                  
+                  
+                  <div><strong>Classification:</strong> <span class="classification classification-mechanic-failure">mechanic failure</span></div>
+                  
+                  
+                  <div><strong>Why:</strong> Three overlapping mechanics — the Sting killing blow is not the real cause.</div>
+                  
+                </div>
+                
+              </li>
+              
+              <li class="death-item">
+                <div>
+                  <span class="player-class-DeathKnight">Megàdeth</span>
+                  <span class="timestamp">&middot; Pull 28 &middot; 8:35</span>
+                </div>
+                <div class="death-context">Cascade window.</div>
+                
+                <div class="diagnosis">
+                  
+                  <div><strong>Killing blow:</strong> <span class="ability">Voidstalker Sting</span></div>
+                  
+                  
+                  <div><strong>Likely root cause:</strong> Low HP from Collapse debuffs.</div>
+                  
+                  
+                  <div><strong>Classification:</strong> <span class="classification classification-mechanic-failure">mechanic failure</span></div>
+                  
+                  
+                  <div><strong>Why:</strong> DK died to a DoT tick because Collapse had already eaten their health buffer.</div>
+                  
+                </div>
+                
+              </li>
+              
+              <li class="death-item">
+                <div>
+                  <span class="player-class-Paladin">Breadblessed</span>
+                  <span class="timestamp">&middot; Pull 28 &middot; 8:38</span>
+                </div>
+                <div class="death-context">Gravity Collapse active.</div>
+                
+                <div class="diagnosis">
+                  
+                  <div><strong>Killing blow:</strong> <span class="ability">Voidstalker Sting</span></div>
+                  
+                  
+                  <div><strong>Likely root cause:</strong> Cascade tail — Collapse + Sting on a player with stacked debuffs.</div>
+                  
+                  
+                  <div><strong>Classification:</strong> <span class="classification classification-mechanic-failure">mechanic failure</span></div>
+                  
+                  
+                  <div><strong>Why:</strong> Paladin had Collapse debuff stacks from earlier bad breaks.</div>
+                  
+                </div>
+                
+              </li>
+              
+              <li class="death-item">
+                <div>
+                  <span class="player-class-Paladin">Sparowprince</span>
+                  <span class="timestamp">&middot; Pull 28 &middot; 8:38</span>
+                </div>
+                <div class="death-context">Gravity Collapse active.</div>
+                
+                <div class="diagnosis">
+                  
+                  <div><strong>Killing blow:</strong> <span class="ability">Voidstalker Sting</span></div>
+                  
+                  
+                  <div><strong>Likely root cause:</strong> Same cascade tail.</div>
+                  
+                  
+                  <div><strong>Classification:</strong> <span class="classification classification-mechanic-failure">mechanic failure</span></div>
+                  
+                  
+                  <div><strong>Why:</strong> Second paladin in the same beat confirms a raid-wide debuff problem, not a single-target Sting problem.</div>
+                  
+                </div>
+                
+              </li>
+              
+            </ul>
+            
+          </div>
+        </div>
+      
+        <div class="cause-card severity-recurring" data-collapsed="true">
+          <div class="cause-header" onclick="toggleCard(this)">
+            <div>
+              <span class="cause-title"><span class="ability">Grasp of Emptiness beams</span></span>
+              <div style="font-size: 12px; color: var(--text-dim); margin-top: 4px;">
+                Pulls: 28
+              </div>
+            </div>
+            <div class="cause-count">3 deaths</div>
+          </div>
+          <div class="cause-body">
+            
+            <p><strong>Mechanic:</strong> Grasp of Emptiness anchors a player to an obelisk for 8 seconds; on expiration, beam attacks fire from the obelisk. The raid must move as a unit to dodge.</p>
+            
+            
+            <p><strong>Pattern:</strong> Three deaths at 8:04 and 9:01 on anchor expiration. All three were in the beam lane when Grasp expired. This is a &#39;reposition as a group&#39; failure, not a positional assignment issue.</p>
+            
+            
+            <p><strong>Individual deaths:</strong></p>
+            <ul class="death-list">
+              
+              <li class="death-item">
+                <div>
+                  <span class="player-class-Monk">Syuon</span>
+                  <span class="timestamp">&middot; Pull 28 &middot; 8:04</span>
+                </div>
+                <div class="death-context">Gravity Collapse and Voidstalker Sting also in window.</div>
+                
+                <div class="diagnosis">
+                  
+                  <div><strong>Killing blow:</strong> <span class="ability">Bursting Emptiness</span></div>
+                  
+                  
+                  <div><strong>Likely root cause:</strong> Stood in the beam lane when Grasp expired.</div>
+                  
+                  
+                  <div><strong>Classification:</strong> <span class="classification classification-mechanic-failure">mechanic failure</span></div>
+                  
+                  
+                  <div><strong>Why:</strong> Group did not reposition as a unit during the tether cascade — Grasp beam hit Syuon.</div>
+                  
+                </div>
+                
+              </li>
+              
+              <li class="death-item">
+                <div>
+                  <span class="player-class-Priest">Zoeìe</span>
+                  <span class="timestamp">&middot; Pull 28 &middot; 9:01</span>
+                </div>
+                <div class="death-context">Dark Rush and Devouring Cosmos ticks in the window.</div>
+                
+                <div class="diagnosis">
+                  
+                  <div><strong>Killing blow:</strong> <span class="ability">Grasp of Emptiness</span></div>
+                  
+                  
+                  <div><strong>Likely root cause:</strong> Beam-lane position on anchor expiration.</div>
+                  
+                  
+                  <div><strong>Classification:</strong> <span class="classification classification-mechanic-failure">mechanic failure</span></div>
+                  
+                  
+                  <div><strong>Why:</strong> Priest was still moving on Dark Rush when Grasp beams fired — did not clear the lane.</div>
+                  
+                </div>
+                
+              </li>
+              
+              <li class="death-item">
+                <div>
+                  <span class="player-class-Monk">Skidouche</span>
+                  <span class="timestamp">&middot; Pull 28 &middot; 9:01</span>
+                </div>
+                <div class="death-context">Same beat as Zoeìe.</div>
+                
+                <div class="diagnosis">
+                  
+                  <div><strong>Killing blow:</strong> <span class="ability">Grasp of Emptiness</span></div>
+                  
+                  
+                  <div><strong>Likely root cause:</strong> Beam-lane position.</div>
+                  
+                  
+                  <div><strong>Classification:</strong> <span class="classification classification-assignment-soak-failure">assignment/soak failure</span></div>
+                  
+                  
+                  <div><strong>Why:</strong> Monk stood in the same lane that killed the priest; group did not collapse together away from the beam.</div>
+                  
+                </div>
+                
+              </li>
+              
+            </ul>
+            
+          </div>
+        </div>
+      
+        <div class="cause-card severity-isolated" data-collapsed="true">
+          <div class="cause-header" onclick="toggleCard(this)">
+            <div>
+              <span class="cause-title"><span class="ability">Void Remnants (Phase 2)</span></span>
+              <div style="font-size: 12px; color: var(--text-dim); margin-top: 4px;">
+                Pulls: 28
+              </div>
+            </div>
+            <div class="cause-count">1 death</div>
+          </div>
+          <div class="cause-body">
+            
+            <p><strong>Mechanic:</strong> Ground puddles from the Rift Simulacrum in Phase 2.</p>
+            
+            
+            <p><strong>Pattern:</strong> One Phase-2 death at 4:44 during Cosmic Barrier burn. Everyone else cleared Phase 2 cleanly.</p>
+            
+            
+            <p><strong>Individual deaths:</strong></p>
+            <ul class="death-list">
+              
+              <li class="death-item">
+                <div>
+                  <span class="player-class-DemonHunter">Lóveless</span>
+                  <span class="timestamp">&middot; Pull 28 &middot; 4:44</span>
+                </div>
+                <div class="death-context">Cosmic Barrier and Void Expulsion in the window.</div>
+                
+                <div class="diagnosis">
+                  
+                  <div><strong>Killing blow:</strong> <span class="ability">Void Remnants</span></div>
+                  
+                  
+                  <div><strong>Likely root cause:</strong> Stood in a remnant puddle during the Barrier burn window.</div>
+                  
+                  
+                  <div><strong>Classification:</strong> <span class="classification classification-mechanic-failure">mechanic failure</span></div>
+                  
+                  
+                  <div><strong>Why:</strong> Pure avoidable ground damage. DH should have moved out.</div>
+                  
+                </div>
+                
+              </li>
+              
+            </ul>
+            
+          </div>
+        </div>
+      
+        <div class="cause-card severity-isolated" data-collapsed="true">
+          <div class="cause-header" onclick="toggleCard(this)">
+            <div>
+              <span class="cause-title"><span class="ability">Devouring Cosmos</span></span>
+              <div style="font-size: 12px; color: var(--text-dim); margin-top: 4px;">
+                Pulls: 28
+              </div>
+            </div>
+            <div class="cause-count">1 death</div>
+          </div>
+          <div class="cause-body">
+            
+            <p><strong>Mechanic:</strong> Phase 3 no-heal ground puddle that covers the current slice.</p>
+            
+            
+            <p><strong>Pattern:</strong> One death at 9:02 on the final slice transition. Likely Diesl did not pick up a feather.</p>
+            
+            
+            <p><strong>Individual deaths:</strong></p>
+            <ul class="death-list">
+              
+              <li class="death-item">
+                <div>
+                  <span class="player-class-Paladin">Diesl</span>
+                  <span class="timestamp">&middot; Pull 28 &middot; 9:02</span>
+                </div>
+                <div class="death-context">Voidstalker Sting and Bursting Emptiness in the window.</div>
+                
+                <div class="diagnosis">
+                  
+                  <div><strong>Killing blow:</strong> <span class="ability">Devouring Cosmos</span></div>
+                  
+                  
+                  <div><strong>Likely root cause:</strong> Stayed on the covered slice instead of gliding to the next one.</div>
+                  
+                  
+                  <div><strong>Classification:</strong> <span class="classification classification-mechanic-failure">mechanic failure</span></div>
+                  
+                  
+                  <div><strong>Why:</strong> Devouring Cosmos is a leave-the-slice mechanic. Diesl was still on the ground when it finished forming.</div>
+                  
+                </div>
+                
+              </li>
+              
+            </ul>
+            
+          </div>
+        </div>
+      
+        <div class="cause-card severity-recurring" data-collapsed="true">
+          <div class="cause-header" onclick="toggleCard(this)">
+            <div>
+              <span class="cause-title"><span class="ability">Unlogged killing blows (Intermission 2 / transition)</span></span>
+              <div style="font-size: 12px; color: var(--text-dim); margin-top: 4px;">
+                Pulls: 28
+              </div>
+            </div>
+            <div class="cause-count">5 deaths</div>
+          </div>
+          <div class="cause-body">
+            
+            <p><strong>Mechanic:</strong> Deaths without a recorded damage killing blow in the 15-second pre-death window. On this fight that usually means Orbiting Matter bolts during the 300% debuff, a failed feather pickup, or a platform loss.</p>
+            
+            
+            <p><strong>Pattern:</strong> Five deaths cluster at 6:38-6:58 (the Intermission 2 / Phase 3 transition). Most likely Orbiting Matter bolt hits during the 300% arrow damage debuff window, or missed slice jumps into Devouring Cosmos.</p>
+            
+            
+            <p><strong>Individual deaths:</strong></p>
+            <ul class="death-list">
+              
+              <li class="death-item">
+                <div>
+                  <span class="player-class-DeathKnight">Megàdeth</span>
+                  <span class="timestamp">&middot; Pull 28 &middot; 6:38</span>
+                </div>
+                <div class="death-context">Stellar Emission / Orbiting Matter in the window.</div>
+                
+                <div class="diagnosis">
+                  
+                  <div><strong>Killing blow:</strong> <span class="ability">(unlogged)</span></div>
+                  
+                  
+                  <div><strong>Likely root cause:</strong> Most likely moved during the Intermission 2 300% debuff window and ate an Orbiting Matter bolt.</div>
+                  
+                  
+                  <div><strong>Classification:</strong> <span class="classification classification-mechanic-failure">mechanic failure</span></div>
+                  
+                  
+                  <div><strong>Why:</strong> The only lethal mechanic in this window at this fight time is Orbiting Matter + 300% debuff.</div>
+                  
+                </div>
+                
+              </li>
+              
+              <li class="death-item">
+                <div>
+                  <span class="player-class-Warlock">Coltenqwe</span>
+                  <span class="timestamp">&middot; Pull 28 &middot; 6:40</span>
+                </div>
+                <div class="death-context">Burning Rush and Fel Armor in the window.</div>
+                
+                <div class="diagnosis">
+                  
+                  <div><strong>Killing blow:</strong> <span class="ability">(unlogged)</span></div>
+                  
+                  
+                  <div><strong>Likely root cause:</strong> Burning Rush self-damage plus transition movement — likely an Orbiting Matter hit or a failed feather jump.</div>
+                  
+                  
+                  <div><strong>Classification:</strong> <span class="classification classification-mechanic-failure">mechanic failure</span></div>
+                  
+                  
+                  <div><strong>Why:</strong> Warlocks running Burning Rush plus a transition window is the classic &#39;moved when I should have stood still&#39; signature.</div>
+                  
+                </div>
+                
+              </li>
+              
+              <li class="death-item">
+                <div>
+                  <span class="player-class-Evoker">Wízardlizard</span>
+                  <span class="timestamp">&middot; Pull 28 &middot; 6:56</span>
+                </div>
+                <div class="death-context">No damage events recorded.</div>
+                
+                <div class="diagnosis">
+                  
+                  <div><strong>Killing blow:</strong> <span class="ability">(unlogged)</span></div>
+                  
+                  
+                  <div><strong>Likely root cause:</strong> Likely a platform loss — zero damage events before death fits that signature.</div>
+                  
+                  
+                  <div><strong>Classification:</strong> <span class="classification classification-unclear-mixed">unclear/mixed</span></div>
+                  
+                  
+                  <div><strong>Why:</strong> No damage events means the killing blow was either fall damage or an environmental hit the log did not capture.</div>
+                  
+                </div>
+                
+              </li>
+              
+              <li class="death-item">
+                <div>
+                  <span class="player-class-Paladin">Choggie</span>
+                  <span class="timestamp">&middot; Pull 28 &middot; 7:41</span>
+                </div>
+                <div class="death-context">Voidstalker Sting and Gravity Collapse in the window.</div>
+                
+                <div class="diagnosis">
+                  
+                  <div><strong>Killing blow:</strong> <span class="ability">(unlogged)</span></div>
+                  
+                  
+                  <div><strong>Likely root cause:</strong> Possible early Phase 3 feather/slice failure or a Sting tick not captured in the log.</div>
+                  
+                  
+                  <div><strong>Classification:</strong> <span class="classification classification-unclear-mixed">unclear/mixed</span></div>
+                  
+                  
+                  <div><strong>Why:</strong> The window shows P3 mechanics; attribution is not clean without a killing blow line.</div>
+                  
+                </div>
+                
+              </li>
+              
+              <li class="death-item">
+                <div>
+                  <span class="player-class-Paladin">Dezmund</span>
+                  <span class="timestamp">&middot; Pull 28 &middot; 8:58</span>
+                </div>
+                <div class="death-context">Dark Rush and Voidstalker Sting in the window.</div>
+                
+                <div class="diagnosis">
+                  
+                  <div><strong>Killing blow:</strong> <span class="ability">(unlogged)</span></div>
+                  
+                  
+                  <div><strong>Likely root cause:</strong> Dark Rush + movement in the final window usually ends in a missed jump or off-platform loss.</div>
+                  
+                  
+                  <div><strong>Classification:</strong> <span class="classification classification-unclear-mixed">unclear/mixed</span></div>
+                  
+                  
+                  <div><strong>Why:</strong> Feather use during the final cascade is the most common off-platform scenario.</div>
+                  
+                </div>
+                
+              </li>
+              
+            </ul>
+            
+          </div>
+        </div>
+      
+    </section>
+
+    
+
+    <section class="timeline">
+      <h2>Timeline across pulls</h2>
+      
+      
+      <div class="timeline-row">
+        <div class="timeline-label">Pull 28</div>
+        <div class="timeline-bar">
+          
+          <div class="death-marker"
+               style="left: 52.302025782688766%;"
+               title="Lóveless — Void Remnants"></div>
+          
+          <div class="death-marker"
+               style="left: 73.29650092081032%;"
+               title="Megàdeth — (unlogged)"></div>
+          
+          <div class="death-marker"
+               style="left: 73.66482504604052%;"
+               title="Coltenqwe — (unlogged)"></div>
+          
+          <div class="death-marker"
+               style="left: 76.61141804788214%;"
+               title="Wízardlizard — (unlogged)"></div>
+          
+          <div class="death-marker"
+               style="left: 84.8987108655617%;"
+               title="Choggie — (unlogged)"></div>
+          
+          <div class="death-marker"
+               style="left: 86.0036832412523%;"
+               title="Towongfoo — Voidstalker Sting"></div>
+          
+          <div class="death-marker"
+               style="left: 88.02946593001842%;"
+               title="Mcnuggs — (unlogged)"></div>
+          
+          <div class="death-marker"
+               style="left: 88.58195211786372%;"
+               title="Coltenqwe — Gravity Collapse"></div>
+          
+          <div class="death-marker"
+               style="left: 88.58195211786372%;"
+               title="Mcnuggs — Gravity Collapse"></div>
+          
+          <div class="death-marker"
+               style="left: 89.13443830570903%;"
+               title="Syuon — Bursting Emptiness"></div>
+          
+          <div class="death-marker"
+               style="left: 89.13443830570903%;"
+               title="Onetreehealz — Gravity Collapse"></div>
+          
+          <div class="death-marker"
+               style="left: 93.92265193370166%;"
+               title="Zappinuraw — Voidstalker Sting"></div>
+          
+          <div class="death-marker"
+               style="left: 94.47513812154696%;"
+               title="Huntermehv — Voidstalker Sting"></div>
+          
+          <div class="death-marker"
+               style="left: 94.47513812154696%;"
+               title="Aluu — Voidstalker Sting"></div>
+          
+          <div class="death-marker"
+               style="left: 94.84346224677716%;"
+               title="Megàdeth — Voidstalker Sting"></div>
+          
+          <div class="death-marker"
+               style="left: 95.21178637200737%;"
+               title="Sawyare — Gravity Collapse"></div>
+          
+          <div class="death-marker"
+               style="left: 95.21178637200737%;"
+               title="Tunasat — Gravity Collapse"></div>
+          
+          <div class="death-marker"
+               style="left: 95.39594843462247%;"
+               title="Breadblessed — Voidstalker Sting"></div>
+          
+          <div class="death-marker"
+               style="left: 95.39594843462247%;"
+               title="Sparowprince — Voidstalker Sting"></div>
+          
+          <div class="death-marker"
+               style="left: 99.0791896869245%;"
+               title="Dezmund — (unlogged)"></div>
+          
+          <div class="death-marker"
+               style="left: 99.6316758747698%;"
+               title="Zoeìe — Grasp of Emptiness"></div>
+          
+          <div class="death-marker"
+               style="left: 99.6316758747698%;"
+               title="Skidouche — Grasp of Emptiness"></div>
+          
+          <div class="death-marker"
+               style="left: 99.8158379373849%;"
+               title="Diesl — Devouring Cosmos"></div>
+          
+        </div>
+      </div>
+      
+    </section>
+
+    <section class="per-player">
+      <h2>Per-player breakdown</h2>
+      
+      
+      <div class="cause-card" data-collapsed="true">
+        <div class="cause-header" onclick="toggleCard(this)">
+          <div>
+            <span class="player-class-DeathKnight">Megàdeth</span>
+            <span style="color: var(--text-dim); font-size: 12px;"> (DeathKnight)</span>
+          </div>
+          <div class="cause-count">2 deaths</div>
+        </div>
+        <div class="cause-body">
+            <ul>
+            
+            <li>
+              <span class="timestamp">Pull 28 &middot; 6:38</span>
+              &middot; <span class="ability">(unlogged)</span>
+              
+              <br><span style="color: var(--text-dim);">Intermission 2 / Phase 3 transition — likely Orbiting Matter</span>
+            </li>
+            
+            <li>
+              <span class="timestamp">Pull 28 &middot; 8:35</span>
+              &middot; <span class="ability">Voidstalker Sting</span>
+              
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">dot</span>
+        
+        <span class="mechanic-tag">random-target</span>
+        
+      </div>
+      
+              <br><span style="color: var(--text-dim);">Tether cascade window</span>
+            </li>
+            
+          </ul>
+        </div>
+      </div>
+      
+      <div class="cause-card" data-collapsed="true">
+        <div class="cause-header" onclick="toggleCard(this)">
+          <div>
+            <span class="player-class-Warlock">Coltenqwe</span>
+            <span style="color: var(--text-dim); font-size: 12px;"> (Warlock)</span>
+          </div>
+          <div class="cause-count">2 deaths</div>
+        </div>
+        <div class="cause-body">
+            <ul>
+            
+            <li>
+              <span class="timestamp">Pull 28 &middot; 6:40</span>
+              &middot; <span class="ability">(unlogged)</span>
+              
+              <br><span style="color: var(--text-dim);">Transition — Burning Rush + movement</span>
+            </li>
+            
+            <li>
+              <span class="timestamp">Pull 28 &middot; 8:01</span>
+              &middot; <span class="ability">Gravity Collapse</span>
+              
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">raid-wide</span>
+        
+        <span class="mechanic-tag">debuff</span>
+        
+        <span class="mechanic-tag">phase-3</span>
+        
+      </div>
+      
+              <br><span style="color: var(--text-dim);">First tether-break cascade</span>
+            </li>
+            
+          </ul>
+        </div>
+      </div>
+      
+      <div class="cause-card" data-collapsed="true">
+        <div class="cause-header" onclick="toggleCard(this)">
+          <div>
+            <span class="player-class-Shaman">Mcnuggs</span>
+            <span style="color: var(--text-dim); font-size: 12px;"> (Shaman)</span>
+          </div>
+          <div class="cause-count">2 deaths</div>
+        </div>
+        <div class="cause-body">
+            <ul>
+            
+            <li>
+              <span class="timestamp">Pull 28 &middot; 7:58</span>
+              &middot; <span class="ability">(unlogged)</span>
+              
+              <br><span style="color: var(--text-dim);">Early Phase 3</span>
+            </li>
+            
+            <li>
+              <span class="timestamp">Pull 28 &middot; 8:01</span>
+              &middot; <span class="ability">Gravity Collapse</span>
+              
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">raid-wide</span>
+        
+        <span class="mechanic-tag">debuff</span>
+        
+        <span class="mechanic-tag">phase-3</span>
+        
+      </div>
+      
+              <br><span style="color: var(--text-dim);">Same beat as Coltenqwe</span>
+            </li>
+            
+          </ul>
+        </div>
+      </div>
+      
+      <div class="cause-card" data-collapsed="true">
+        <div class="cause-header" onclick="toggleCard(this)">
+          <div>
+            <span class="player-class-DemonHunter">Lóveless</span>
+            <span style="color: var(--text-dim); font-size: 12px;"> (DemonHunter)</span>
+          </div>
+          <div class="cause-count">1 death</div>
+        </div>
+        <div class="cause-body">
+            <ul>
+            
+            <li>
+              <span class="timestamp">Pull 28 &middot; 4:44</span>
+              &middot; <span class="ability">Void Remnants</span>
+              
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">ground</span>
+        
+        <span class="mechanic-tag">damage-over-time</span>
+        
+      </div>
+      
+              <br><span style="color: var(--text-dim);">Phase 2 Barrier burn</span>
+            </li>
+            
+          </ul>
+        </div>
+      </div>
+      
+      <div class="cause-card" data-collapsed="true">
+        <div class="cause-header" onclick="toggleCard(this)">
+          <div>
+            <span class="player-class-Monk">Towongfoo</span>
+            <span style="color: var(--text-dim); font-size: 12px;"> (Monk)</span>
+          </div>
+          <div class="cause-count">1 death</div>
+        </div>
+        <div class="cause-body">
+            <ul>
+            
+            <li>
+              <span class="timestamp">Pull 28 &middot; 7:47</span>
+              &middot; <span class="ability">Voidstalker Sting</span>
+              
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">dot</span>
+        
+        <span class="mechanic-tag">random-target</span>
+        
+      </div>
+      
+              <br><span style="color: var(--text-dim);">Early P3, pre-cascade</span>
+            </li>
+            
+          </ul>
+        </div>
+      </div>
+      
+      <div class="cause-card" data-collapsed="true">
+        <div class="cause-header" onclick="toggleCard(this)">
+          <div>
+            <span class="player-class-Monk">Syuon</span>
+            <span style="color: var(--text-dim); font-size: 12px;"> (Monk)</span>
+          </div>
+          <div class="cause-count">1 death</div>
+        </div>
+        <div class="cause-body">
+            <ul>
+            
+            <li>
+              <span class="timestamp">Pull 28 &middot; 8:04</span>
+              &middot; <span class="ability">Bursting Emptiness</span>
+              
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">backlash</span>
+        
+        <span class="mechanic-tag">phase-3</span>
+        
+      </div>
+      
+              <br><span style="color: var(--text-dim);">Grasp beam lane</span>
+            </li>
+            
+          </ul>
+        </div>
+      </div>
+      
+      <div class="cause-card" data-collapsed="true">
+        <div class="cause-header" onclick="toggleCard(this)">
+          <div>
+            <span class="player-class-Druid">Onetreehealz</span>
+            <span style="color: var(--text-dim); font-size: 12px;"> (Druid)</span>
+          </div>
+          <div class="cause-count">1 death</div>
+        </div>
+        <div class="cause-body">
+            <ul>
+            
+            <li>
+              <span class="timestamp">Pull 28 &middot; 8:04</span>
+              &middot; <span class="ability">Gravity Collapse</span>
+              
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">raid-wide</span>
+        
+        <span class="mechanic-tag">debuff</span>
+        
+        <span class="mechanic-tag">phase-3</span>
+        
+      </div>
+      
+              <br><span style="color: var(--text-dim);">Healer caught mid-reposition</span>
+            </li>
+            
+          </ul>
+        </div>
+      </div>
+      
+      <div class="cause-card" data-collapsed="true">
+        <div class="cause-header" onclick="toggleCard(this)">
+          <div>
+            <span class="player-class-Shaman">Zappinuraw</span>
+            <span style="color: var(--text-dim); font-size: 12px;"> (Shaman)</span>
+          </div>
+          <div class="cause-count">1 death</div>
+        </div>
+        <div class="cause-body">
+            <ul>
+            
+            <li>
+              <span class="timestamp">Pull 28 &middot; 8:30</span>
+              &middot; <span class="ability">Voidstalker Sting</span>
+              
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">dot</span>
+        
+        <span class="mechanic-tag">random-target</span>
+        
+      </div>
+      
+              <br><span style="color: var(--text-dim);">Tether cascade</span>
+            </li>
+            
+          </ul>
+        </div>
+      </div>
+      
+      <div class="cause-card" data-collapsed="true">
+        <div class="cause-header" onclick="toggleCard(this)">
+          <div>
+            <span class="player-class-Hunter">Huntermehv</span>
+            <span style="color: var(--text-dim); font-size: 12px;"> (Hunter)</span>
+          </div>
+          <div class="cause-count">1 death</div>
+        </div>
+        <div class="cause-body">
+            <ul>
+            
+            <li>
+              <span class="timestamp">Pull 28 &middot; 8:33</span>
+              &middot; <span class="ability">Voidstalker Sting</span>
+              
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">dot</span>
+        
+        <span class="mechanic-tag">random-target</span>
+        
+      </div>
+      
+              <br><span style="color: var(--text-dim);">Tether cascade</span>
+            </li>
+            
+          </ul>
+        </div>
+      </div>
+      
+      <div class="cause-card" data-collapsed="true">
+        <div class="cause-header" onclick="toggleCard(this)">
+          <div>
+            <span class="player-class-Warlock">Aluu</span>
+            <span style="color: var(--text-dim); font-size: 12px;"> (Warlock)</span>
+          </div>
+          <div class="cause-count">1 death</div>
+        </div>
+        <div class="cause-body">
+            <ul>
+            
+            <li>
+              <span class="timestamp">Pull 28 &middot; 8:33</span>
+              &middot; <span class="ability">Voidstalker Sting</span>
+              
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">dot</span>
+        
+        <span class="mechanic-tag">random-target</span>
+        
+      </div>
+      
+              <br><span style="color: var(--text-dim);">Tether cascade + Grasp overlap</span>
+            </li>
+            
+          </ul>
+        </div>
+      </div>
+      
+      <div class="cause-card" data-collapsed="true">
+        <div class="cause-header" onclick="toggleCard(this)">
+          <div>
+            <span class="player-class-Mage">Sawyare</span>
+            <span style="color: var(--text-dim); font-size: 12px;"> (Mage)</span>
+          </div>
+          <div class="cause-count">1 death</div>
+        </div>
+        <div class="cause-body">
+            <ul>
+            
+            <li>
+              <span class="timestamp">Pull 28 &middot; 8:37</span>
+              &middot; <span class="ability">Gravity Collapse</span>
+              
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">raid-wide</span>
+        
+        <span class="mechanic-tag">debuff</span>
+        
+        <span class="mechanic-tag">phase-3</span>
+        
+      </div>
+      
+              <br><span style="color: var(--text-dim);">Second tether break cascade</span>
+            </li>
+            
+          </ul>
+        </div>
+      </div>
+      
+      <div class="cause-card" data-collapsed="true">
+        <div class="cause-header" onclick="toggleCard(this)">
+          <div>
+            <span class="player-class-Mage">Tunasat</span>
+            <span style="color: var(--text-dim); font-size: 12px;"> (Mage)</span>
+          </div>
+          <div class="cause-count">1 death</div>
+        </div>
+        <div class="cause-body">
+            <ul>
+            
+            <li>
+              <span class="timestamp">Pull 28 &middot; 8:37</span>
+              &middot; <span class="ability">Gravity Collapse</span>
+              
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">raid-wide</span>
+        
+        <span class="mechanic-tag">debuff</span>
+        
+        <span class="mechanic-tag">phase-3</span>
+        
+      </div>
+      
+              <br><span style="color: var(--text-dim);">Second tether break cascade</span>
+            </li>
+            
+          </ul>
+        </div>
+      </div>
+      
+      <div class="cause-card" data-collapsed="true">
+        <div class="cause-header" onclick="toggleCard(this)">
+          <div>
+            <span class="player-class-Paladin">Breadblessed</span>
+            <span style="color: var(--text-dim); font-size: 12px;"> (Paladin)</span>
+          </div>
+          <div class="cause-count">1 death</div>
+        </div>
+        <div class="cause-body">
+            <ul>
+            
+            <li>
+              <span class="timestamp">Pull 28 &middot; 8:38</span>
+              &middot; <span class="ability">Voidstalker Sting</span>
+              
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">dot</span>
+        
+        <span class="mechanic-tag">random-target</span>
+        
+      </div>
+      
+              <br><span style="color: var(--text-dim);">Cascade tail</span>
+            </li>
+            
+          </ul>
+        </div>
+      </div>
+      
+      <div class="cause-card" data-collapsed="true">
+        <div class="cause-header" onclick="toggleCard(this)">
+          <div>
+            <span class="player-class-Paladin">Sparowprince</span>
+            <span style="color: var(--text-dim); font-size: 12px;"> (Paladin)</span>
+          </div>
+          <div class="cause-count">1 death</div>
+        </div>
+        <div class="cause-body">
+            <ul>
+            
+            <li>
+              <span class="timestamp">Pull 28 &middot; 8:38</span>
+              &middot; <span class="ability">Voidstalker Sting</span>
+              
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">dot</span>
+        
+        <span class="mechanic-tag">random-target</span>
+        
+      </div>
+      
+              <br><span style="color: var(--text-dim);">Cascade tail</span>
+            </li>
+            
+          </ul>
+        </div>
+      </div>
+      
+      <div class="cause-card" data-collapsed="true">
+        <div class="cause-header" onclick="toggleCard(this)">
+          <div>
+            <span class="player-class-Paladin">Dezmund</span>
+            <span style="color: var(--text-dim); font-size: 12px;"> (Paladin)</span>
+          </div>
+          <div class="cause-count">1 death</div>
+        </div>
+        <div class="cause-body">
+            <ul>
+            
+            <li>
+              <span class="timestamp">Pull 28 &middot; 8:58</span>
+              &middot; <span class="ability">(unlogged)</span>
+              
+              <br><span style="color: var(--text-dim);">Dark Rush — possible platform loss</span>
+            </li>
+            
+          </ul>
+        </div>
+      </div>
+      
+      <div class="cause-card" data-collapsed="true">
+        <div class="cause-header" onclick="toggleCard(this)">
+          <div>
+            <span class="player-class-Priest">Zoeìe</span>
+            <span style="color: var(--text-dim); font-size: 12px;"> (Priest)</span>
+          </div>
+          <div class="cause-count">1 death</div>
+        </div>
+        <div class="cause-body">
+            <ul>
+            
+            <li>
+              <span class="timestamp">Pull 28 &middot; 9:01</span>
+              &middot; <span class="ability">Grasp of Emptiness</span>
+              
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">tether</span>
+        
+        <span class="mechanic-tag">dodge</span>
+        
+        <span class="mechanic-tag">phase-3</span>
+        
+      </div>
+      
+              <br><span style="color: var(--text-dim);">Beam lane on expiration</span>
+            </li>
+            
+          </ul>
+        </div>
+      </div>
+      
+      <div class="cause-card" data-collapsed="true">
+        <div class="cause-header" onclick="toggleCard(this)">
+          <div>
+            <span class="player-class-Monk">Skidouche</span>
+            <span style="color: var(--text-dim); font-size: 12px;"> (Monk)</span>
+          </div>
+          <div class="cause-count">1 death</div>
+        </div>
+        <div class="cause-body">
+            <ul>
+            
+            <li>
+              <span class="timestamp">Pull 28 &middot; 9:01</span>
+              &middot; <span class="ability">Grasp of Emptiness</span>
+              
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">tether</span>
+        
+        <span class="mechanic-tag">dodge</span>
+        
+        <span class="mechanic-tag">phase-3</span>
+        
+      </div>
+      
+              <br><span style="color: var(--text-dim);">Same beam lane as Zoeìe</span>
+            </li>
+            
+          </ul>
+        </div>
+      </div>
+      
+      <div class="cause-card" data-collapsed="true">
+        <div class="cause-header" onclick="toggleCard(this)">
+          <div>
+            <span class="player-class-Paladin">Diesl</span>
+            <span style="color: var(--text-dim); font-size: 12px;"> (Paladin)</span>
+          </div>
+          <div class="cause-count">1 death</div>
+        </div>
+        <div class="cause-body">
+            <ul>
+            
+            <li>
+              <span class="timestamp">Pull 28 &middot; 9:02</span>
+              &middot; <span class="ability">Devouring Cosmos</span>
+              
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">ground</span>
+        
+        <span class="mechanic-tag">no-heal</span>
+        
+        <span class="mechanic-tag">phase-3</span>
+        
+      </div>
+      
+              <br><span style="color: var(--text-dim);">Stayed on the covered slice</span>
+            </li>
+            
+          </ul>
+        </div>
+      </div>
+      
+      <div class="cause-card" data-collapsed="true">
+        <div class="cause-header" onclick="toggleCard(this)">
+          <div>
+            <span class="player-class-Evoker">Wízardlizard</span>
+            <span style="color: var(--text-dim); font-size: 12px;"> (Evoker)</span>
+          </div>
+          <div class="cause-count">1 death</div>
+        </div>
+        <div class="cause-body">
+            <ul>
+            
+            <li>
+              <span class="timestamp">Pull 28 &middot; 6:56</span>
+              &middot; <span class="ability">(unlogged)</span>
+              
+              <br><span style="color: var(--text-dim);">Zero damage events — likely platform loss</span>
+            </li>
+            
+          </ul>
+        </div>
+      </div>
+      
+      <div class="cause-card" data-collapsed="true">
+        <div class="cause-header" onclick="toggleCard(this)">
+          <div>
+            <span class="player-class-Paladin">Choggie</span>
+            <span style="color: var(--text-dim); font-size: 12px;"> (Paladin)</span>
+          </div>
+          <div class="cause-count">1 death</div>
+        </div>
+        <div class="cause-body">
+            <ul>
+            
+            <li>
+              <span class="timestamp">Pull 28 &middot; 7:41</span>
+              &middot; <span class="ability">(unlogged)</span>
+              
+              <br><span style="color: var(--text-dim);">Early P3</span>
+            </li>
+            
+          </ul>
+        </div>
+      </div>
+      
+    </section>
+
+    <section class="recommendations">
+      <h2>Recommendations</h2>
+      
+      <ol>
+        
+        <li>Call Aspect of the End tether breaks out loud, every cast: &#39;RANGED break, MELEE break, TANK break.&#39; This is the #1 fix for the 8:01 and 8:30-8:38 cascades.</li>
+        
+        <li>Tethered players spread to 30+ yards before pulling. The 8:01 double-death and 8:37 twin-mage death both look like breaks inside 30 yards.</li>
+        
+        <li>Treat Voidstalker Sting as ambient raid damage on Heroic. Do not burn personal defensives on Sting — save them for tether cascades and Grasp beams.</li>
+        
+        <li>During Grasp of Emptiness, move the WHOLE raid as a unit away from the obelisk beam lane. The 9:01 Zoeìe + Skidouche double-death is a group-reposition failure.</li>
+        
+        <li>Audit the 6:38-6:58 transition. Five deaths in 20 seconds with no killing blow logged — most likely moving during the Intermission 2 300% arrow debuff window. Standing still during that window is the fix.</li>
+        
+        <li>Dark Rush feathers are REQUIRED in Phase 3. Keep using them. If someone dies &#39;with Dark Rush active,&#39; the cause is usually missing a slice jump or bad feather timing, not the feather itself.</li>
+        
+        <li>Consider a third healer if Phase 3 HPS is the problem — Method&#39;s Heroic guide explicitly calls this an HPS check.</li>
+        
+      </ol>
+    </section>
+
+    <footer class="report-footer">
+      Generated by Warcraft Wipe Checker &middot;
+      <a href="https://www.warcraftlogs.com/reports/RqxmdCnyMZ3AhXWQ" style="color: var(--accent);">View raw log on Warcraft Logs</a>
+    </footer>
+  </div>
+
+  <script>
+    function toggleCard(header) {
+      const card = header.closest(".cause-card");
+      const collapsed = card.getAttribute("data-collapsed") === "true";
+      card.setAttribute("data-collapsed", collapsed ? "false" : "true");
+    }
+  </script>
+</body>
+</html>

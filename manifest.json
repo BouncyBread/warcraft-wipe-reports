@@ -1,6 +1,24 @@
 {
   "reports": [
     {
+      "title": "Crown of the Cosmos",
+      "boss": "Crown of the Cosmos",
+      "difficulty": "Heroic",
+      "date": "2026-04-18",
+      "scope": "Pull 28 only (9-min Phase 3 attempt, 10.54%)",
+      "best_percent": 10.54,
+      "pull_count": 24,
+      "top_causes": [
+        "Gravity Collapse (tether-break cascade)",
+        "Grasp of Emptiness beams",
+        "Void Remnants (Phase 2)"
+      ],
+      "report_url": "https://bouncybread.github.io/warcraft-wipe-reports/reports/crown-of-the-cosmos/2026-04-18-rqxmdcnymz3ahxwq-3181-pull-28-only-9-min-phase-3-attempt-10-54.html",
+      "index_url": "https://bouncybread.github.io/warcraft-wipe-reports",
+      "card_url": "https://bouncybread.github.io/warcraft-wipe-reports/cards/2026-04-18-rqxmdcnymz3ahxwq-3181-pull-28-only-9-min-phase-3-attempt-10-54.png",
+      "slug": "2026-04-18-rqxmdcnymz3ahxwq-3181-pull-28-only-9-min-phase-3-attempt-10-54"
+    },
+    {
       "title": "Queen Ansurek",
       "boss": "Queen Ansurek",
       "difficulty": "Mythic",
