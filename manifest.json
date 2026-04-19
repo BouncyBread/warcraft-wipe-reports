@@ -1,0 +1,21 @@
+{
+  "reports": [
+    {
+      "title": "Queen Ansurek",
+      "boss": "Queen Ansurek",
+      "difficulty": "Mythic",
+      "date": "2026-04-18",
+      "scope": "Pull 11 only",
+      "best_percent": 34.2,
+      "pull_count": 12,
+      "top_causes": [
+        "Sculpting Hex",
+        "Gorging Swarm"
+      ],
+      "report_url": "https://bouncybread.github.io/warcraft-wipe-reports/reports/queen-ansurek/2026-04-18-abc123-3117-pull-11-only.html",
+      "index_url": "https://bouncybread.github.io/warcraft-wipe-reports",
+      "card_url": "https://bouncybread.github.io/warcraft-wipe-reports/cards/2026-04-18-abc123-3117-pull-11-only.png",
+      "slug": "2026-04-18-abc123-3117-pull-11-only"
+    }
+  ]
+}

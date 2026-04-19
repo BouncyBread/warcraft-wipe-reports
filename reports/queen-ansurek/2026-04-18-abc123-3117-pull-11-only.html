@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Queen Ansurek Wipe Analysis</title>
+  <style>:root {
+  --bg: #0f1217;
+  --bg-elev: #1a1f28;
+  --bg-elev-2: #242a35;
+  --text: #e8eaed;
+  --text-dim: #9ba3af;
+  --border: #2d333e;
+  --critical: #d43f3f;
+  --recurring: #e09040;
+  --isolated: #4a7f4a;
+  --accent: #4a9eff;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.container { max-width: 960px; margin: 0 auto; padding: 24px; }
+
+header.report-header {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+}
+header.report-header h1 { margin: 0 0 8px; font-size: 22px; }
+header.report-header .meta { color: var(--text-dim); font-size: 13px; }
+header.report-header .meta a { color: var(--accent); text-decoration: none; }
+header.report-header .meta a:hover { text-decoration: underline; }
+
+section {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+section h2 {
+  margin: 0 0 16px;
+  font-size: 17px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}
+
+.exec-summary ul { margin: 0; padding-left: 20px; }
+.exec-summary li { margin-bottom: 6px; }
+
+.scope-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(74, 158, 255, 0.14);
+  color: #cfe3ff;
+  font-weight: 600;
+}
+
+.scope-mode-specific {
+  background: rgba(74, 158, 255, 0.14);
+}
+
+.scope-mode-default {
+  background: rgba(155, 163, 175, 0.16);
+}
+
+.glossary-list {
+  display: grid;
+  gap: 10px;
+}
+
+.glossary-item {
+  padding: 12px 14px;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.glossary-name {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.glossary-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.mechanic-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(155, 163, 175, 0.16);
+  color: #c8d0db;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: lowercase;
+}
+
+.mechanic-tag-primary {
+  background: rgba(74, 158, 255, 0.18);
+  color: #8cc1ff;
+}
+
+.glossary-summary {
+  color: var(--text-dim);
+}
+
+.glossary-howto {
+  margin-top: 8px;
+  color: var(--text);
+}
+
+.turning-list,
+.cause-mix-list,
+.publish-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.turning-card,
+.cause-mix-row,
+.publish-link {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-elev-2);
+}
+
+.turning-card {
+  padding: 14px 16px;
+}
+
+.turning-card h3 {
+  margin: 6px 0 8px;
+  font-size: 16px;
+}
+
+.turning-meta,
+.cause-mix-count,
+.publish-label {
+  color: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.turning-summary {
+  margin: 0 0 12px;
+}
+
+.turning-mechanics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.turning-chip {
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(74, 158, 255, 0.12);
+  border: 1px solid rgba(74, 158, 255, 0.24);
+}
+
+.cause-mix-row {
+  padding: 12px 14px;
+}
+
+.cause-mix-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.cause-mix-bar {
+  height: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.cause-mix-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), #f0b35f);
+}
+
+.cause-mix-row.severity-critical .cause-mix-bar span {
+  background: linear-gradient(90deg, #ff6b6b, #ffb36b);
+}
+
+.cause-mix-row.severity-recurring .cause-mix-bar span {
+  background: linear-gradient(90deg, #f0b35f, #ffd88a);
+}
+
+.cause-mix-row.severity-isolated .cause-mix-bar span {
+  background: linear-gradient(90deg, #6bcf8c, #a9f0bf);
+}
+
+.cause-mix-notes {
+  margin-top: 8px;
+  color: var(--text-dim);
+}
+
+.publish-link {
+  display: block;
+  padding: 14px 16px;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.publish-link:hover {
+  border-color: var(--accent);
+}
+
+.publish-url {
+  display: block;
+  margin-top: 6px;
+  color: var(--accent);
+  word-break: break-all;
+}
+
+.cause-card {
+  border: 1px solid var(--border);
+  border-left-width: 4px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  background: var(--bg-elev-2);
+  overflow: hidden;
+}
+.cause-card.severity-critical { border-left-color: var(--critical); }
+.cause-card.severity-recurring { border-left-color: var(--recurring); }
+.cause-card.severity-isolated { border-left-color: var(--isolated); }
+
+.cause-card .cause-header {
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+.cause-card .cause-header:hover { background: rgba(255,255,255,0.02); }
+.cause-card .cause-title { font-weight: 600; }
+.cause-card .cause-count {
+  color: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 13px;
+}
+.cause-card .cause-body {
+  padding: 0 16px 16px;
+  border-top: 1px solid var(--border);
+}
+.cause-card[data-collapsed="true"] .cause-body { display: none; }
+
+.death-list {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.death-item {
+  margin-bottom: 14px;
+}
+
+.death-item:last-child {
+  margin-bottom: 0;
+}
+
+.death-context {
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+.diagnosis {
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.diagnosis > div + div {
+  margin-top: 4px;
+}
+
+.classification {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: lowercase;
+}
+
+.classification-mechanic-failure {
+  background: rgba(212, 63, 63, 0.16);
+  color: #ff8f8f;
+}
+
+.classification-healer-throughput-failure {
+  background: rgba(74, 158, 255, 0.16);
+  color: #8cc1ff;
+}
+
+.classification-assignment-soak-failure {
+  background: rgba(224, 144, 64, 0.16);
+  color: #ffc37a;
+}
+
+.classification-unclear-mixed {
+  background: rgba(155, 163, 175, 0.16);
+  color: #c8d0db;
+}
+
+.timeline-row {
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+.timeline-label { color: var(--text-dim); font-family: var(--mono); font-size: 12px; }
+.timeline-bar {
+  position: relative;
+  height: 20px;
+  background: var(--bg-elev-2);
+  border-radius: 3px;
+}
+.timeline-bar .death-marker {
+  position: absolute;
+  top: 2px;
+  width: 3px;
+  height: 16px;
+  background: var(--critical);
+  cursor: help;
+}
+
+.player-row { padding: 8px 0; border-bottom: 1px solid var(--border); }
+.player-row:last-child { border-bottom: none; }
+.player-class-Rogue { color: #fff569; }
+.player-class-Priest { color: #ffffff; }
+.player-class-Mage { color: #3fc7eb; }
+.player-class-Warrior { color: #c69b6d; }
+.player-class-Paladin { color: #f48cba; }
+.player-class-Hunter { color: #aad372; }
+.player-class-Warlock { color: #8788ee; }
+.player-class-Druid { color: #ff7c0a; }
+.player-class-Shaman { color: #0070dd; }
+.player-class-DeathKnight { color: #c41e3a; }
+.player-class-DemonHunter { color: #a330c9; }
+.player-class-Monk { color: #00ff98; }
+.player-class-Evoker { color: #33937f; }
+
+.ability { font-family: var(--mono); }
+.timestamp { font-family: var(--mono); color: var(--text-dim); }
+
+footer.report-footer {
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 12px;
+  margin-top: 24px;
+}
+</style>
+</head>
+<body>
+  <div class="container">
+    
+
+    <header class="report-header">
+      <h1>Queen Ansurek &middot; Mythic</h1>
+      <div class="meta">
+        Guild Raid Night &middot; 2026-04-18 &middot;
+        12 wipes &middot;
+        Best: 34.2% &middot;
+        Avg wipe: 2:40
+        <br>
+        Source: <a href="https://www.warcraftlogs.com/reports/abc123">https://www.warcraftlogs.com/reports/abc123</a>
+      </div>
+    </header>
+
+    <section class="exec-summary">
+      <h2>Summary</h2>
+      <ul>
+        
+        <li>Raid wiped primarily to Sculpting Hex in P1 (9/12 pulls).</li>
+        
+        <li>Tank swap timing on Gorging Swarm slipped in pulls 8 and 10.</li>
+        
+        <li>Pull 11 reached P3 — Infest one-shot 4 players.</li>
+        
+      </ul>
+    </section>
+
+    
+    <section class="analysis-scope">
+      <h2>Analysis scope</h2>
+      <div class="scope-badge scope-mode-specific">Pull 11 only</div>
+    </section>
+    
+
+    
+    <section class="mechanic-glossary">
+      <h2>Mechanic glossary</h2>
+      <div class="glossary-list">
+        
+        <div class="glossary-item">
+          <div class="glossary-name ability">Light Burn</div>
+          
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">absorb/heal</span>
+        
+        <span class="mechanic-tag">dot</span>
+        
+      </div>
+      
+          <div class="glossary-summary">Heavy heal absorb with ticking damage until fully healed. This is a recovery check, not usually the first mistake: it becomes lethal fast if the target already took avoidable damage or healing falls behind.</div>
+          
+          <div class="glossary-howto"><strong>How to handle:</strong> Top the target quickly, use externals if the burn overlaps other raid damage, and do not let earlier mechanics put the player into the burn already low.</div>
+          
+        </div>
+        
+        <div class="glossary-item">
+          <div class="glossary-name ability">Void Burn</div>
+          
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">absorb/heal</span>
+        
+        <span class="mechanic-tag">dot</span>
+        
+      </div>
+      
+          <div class="glossary-summary">Void-side version of the same heal-absorb burn. Like Light Burn, it usually finishes players who were already behind on health or recovery, rather than being the root cause by itself.</div>
+          
+          <div class="glossary-howto"><strong>How to handle:</strong> Treat it like a recovery check: stabilize the target, clear the absorb, and get them out of any extra overlap damage before the burn ramps.</div>
+          
+        </div>
+        
+        <div class="glossary-item">
+          <div class="glossary-name ability">Light Eruption</div>
+          
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">interrupt</span>
+        
+        <span class="mechanic-tag">raid-wide</span>
+        
+      </div>
+      
+          <div class="glossary-summary">Light-side eruption cast that should be interrupted by Light Feather players. If it goes off, the raid takes a burst of Holy damage.</div>
+          
+          <div class="glossary-howto"><strong>How to handle:</strong> Assign a Light Feather interrupter before the cast starts and make sure they are in range and ready to kick on time.</div>
+          
+        </div>
+        
+        <div class="glossary-item">
+          <div class="glossary-name ability">Void Eruption</div>
+          
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">interrupt</span>
+        
+        <span class="mechanic-tag">raid-wide</span>
+        
+      </div>
+      
+          <div class="glossary-summary">Void-side eruption cast that should be interrupted by Void Feather players. A missed interrupt usually means side assignment or timing broke down.</div>
+          
+          <div class="glossary-howto"><strong>How to handle:</strong> Pre-assign a Void Feather interrupter, keep them on the correct side, and treat the cast as a hard stop rather than a healable event.</div>
+          
+        </div>
+        
+        <div class="glossary-item">
+          <div class="glossary-name ability">Void Edict</div>
+          
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">frontal</span>
+        
+        <span class="mechanic-tag">knockback</span>
+        
+      </div>
+      
+          <div class="glossary-summary">Cone attack in front of the boss. The right person has to take the hit in the correct place or Belo&#39;ren is empowered.</div>
+          
+          <div class="glossary-howto"><strong>How to handle:</strong> Put the assigned player in the cone, aim it away from the raid, and keep everyone else out of the front arc.</div>
+          
+        </div>
+        
+        <div class="glossary-item">
+          <div class="glossary-name ability">Light Edict</div>
+          
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">frontal</span>
+        
+        <span class="mechanic-tag">knockback</span>
+        
+      </div>
+      
+          <div class="glossary-summary">Light-side cone attack in front of the boss. Like Void Edict, it is an assignment mechanic, not a pure healer check.</div>
+          
+          <div class="glossary-howto"><strong>How to handle:</strong> Have the correct Light-side player take the cone, then keep the raid clear of the frontal line and follow-up knockback path.</div>
+          
+        </div>
+        
+        <div class="glossary-item">
+          <div class="glossary-name ability">Voidlight Rupture</div>
+          
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">soak/spacing</span>
+        
+        <span class="mechanic-tag">assignment</span>
+        
+      </div>
+      
+          <div class="glossary-summary">Convergence detonation that punishes bad pairing, spacing, or wrong-side handling.</div>
+          
+          <div class="glossary-howto"><strong>How to handle:</strong> Treat this as the end of the convergence step: pair correctly, keep spacing clean, and do not clear it in a clump.</div>
+          
+        </div>
+        
+        <div class="glossary-item">
+          <div class="glossary-name ability">Light Patch</div>
+          
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">ground</span>
+        
+        <span class="mechanic-tag">damage-over-time</span>
+        
+      </div>
+      
+          <div class="glossary-summary">Lingering light ground effect that ramps damage and punishes bad movement.</div>
+          
+          <div class="glossary-howto"><strong>How to handle:</strong> Move out immediately and do not route later mechanics through it.</div>
+          
+        </div>
+        
+        <div class="glossary-item">
+          <div class="glossary-name ability">Void Patch</div>
+          
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">ground</span>
+        
+        <span class="mechanic-tag">damage-over-time</span>
+        
+      </div>
+      
+          <div class="glossary-summary">Lingering void ground effect that ramps damage and punishes bad movement.</div>
+          
+          <div class="glossary-howto"><strong>How to handle:</strong> Clear the area fast and keep the rest of the raid from having to cross it later.</div>
+          
+        </div>
+        
+        <div class="glossary-item">
+          <div class="glossary-name ability">Burning Heart</div>
+          
+      <div class="glossary-tags">
+        
+        <span class="mechanic-tag mechanic-tag-primary">raid-wide</span>
+        
+        <span class="mechanic-tag">damage-over-time</span>
+        
+      </div>
+      
+          <div class="glossary-summary">Sustained ambient raid damage. It is healable by itself, but it makes every other mechanic harder to recover.</div>
+          
+          <div class="glossary-howto"><strong>How to handle:</strong> Plan healing cooldowns around the overlap windows and avoid letting players enter it already low.</div>
+          
+        </div>
+        
+      </div>
+    </section>
+    
+
+    
+    <section class="turning-moments">
+      <h2>Turning moments</h2>
+      <div class="turning-list">
+        
+        <article class="turning-card">
+          <div class="turning-meta">Pull 11 &middot; 7:42</div>
+          <h3>The pull became unrecoverable during the overlap window</h3>
+          <p class="turning-summary">Bursting Emptiness, Gravity Collapse, and Voidstalker Sting landed together.</p>
+          
+          <div class="turning-mechanics">
+            
+            <span class="turning-chip ability">Bursting Emptiness</span>
+            
+            <span class="turning-chip ability">Gravity Collapse</span>
+            
+            <span class="turning-chip ability">Voidstalker Sting</span>
+            
+          </div>
+          
+          
+          <p><strong>Impact:</strong> 3 deaths in 5 seconds</p>
+          
+          
+          <p><strong>Why it mattered:</strong> The raid lost both recovery time and safe space before the final cascade.</p>
+          
+        </article>
+        
+      </div>
+    </section>
+    
+
+    <section class="cause-mix">
+      <h2>Cause mix</h2>
+      
+      <div class="cause-mix-list">
+        
+        <div class="cause-mix-row severity-critical">
+          <div class="cause-mix-header">
+            <span class="ability">Sculpting Hex</span>
+            <span class="cause-mix-count">9 deaths</span>
+          </div>
+          <div class="cause-mix-bar">
+            <span style="width: 100.0%;"></span>
+          </div>
+          
+          <div class="cause-mix-notes">7 of 9 deaths happened when melee stacked.</div>
+          
+        </div>
+        
+        <div class="cause-mix-row severity-recurring">
+          <div class="cause-mix-header">
+            <span class="ability">Gorging Swarm</span>
+            <span class="cause-mix-count">6 deaths</span>
+          </div>
+          <div class="cause-mix-bar">
+            <span style="width: 66.66666666666666%;"></span>
+          </div>
+          
+          <div class="cause-mix-notes">Swap timing slipped during long pulls.</div>
+          
+        </div>
+        
+      </div>
+    </section>
+
+    <section class="top-causes">
+      <h2>Top death causes</h2>
+      
+      
+        <div class="cause-card severity-critical" data-collapsed="false">
+          <div class="cause-header" onclick="toggleCard(this)">
+            <div>
+              <span class="cause-title"><span class="ability">Sculpting Hex</span></span>
+              <div style="font-size: 12px; color: var(--text-dim); margin-top: 4px;">
+                Pulls: 2, 4, 5, 7, 9, 11
+              </div>
+            </div>
+            <div class="cause-count">9 deaths</div>
+          </div>
+          <div class="cause-body">
+            
+            <p><strong>Mechanic:</strong> Targeted spread debuff, leaves void pool. Requires 5yd spread.</p>
+            
+            
+            <p><strong>Pattern:</strong> 7 of 9 deaths happened when melee stacked.</p>
+            
+            
+            <p><strong>Individual deaths:</strong></p>
+            <ul class="death-list">
+              
+              <li class="death-item">
+                <div>
+                  <span class="player-class-Rogue">Nemo</span>
+                  <span class="timestamp">&middot; Pull 2 &middot; 0:47</span>
+                </div>
+                <div class="death-context">Took hex in melee cluster.</div>
+                
+                <div class="diagnosis">
+                  
+                  <div><strong>Killing blow:</strong> <span class="ability">Sculpting Hex</span></div>
+                  
+                  
+                  <div><strong>Likely root cause:</strong> Hex target stayed in the melee stack instead of clearing to 5 yards.</div>
+                  
+                  
+                  <div><strong>Classification:</strong> <span class="classification classification-mechanic-failure">mechanic failure</span></div>
+                  
+                  
+                  <div><strong>Why:</strong> The player died to the direct spread mechanic rather than to a healable dot or absorb.</div>
+                  
+                </div>
+                
+              </li>
+              
+              <li class="death-item">
+                <div>
+                  <span class="player-class-Rogue">Nemo</span>
+                  <span class="timestamp">&middot; Pull 4 &middot; 1:12</span>
+                </div>
+                <div class="death-context">Double hex, no personal.</div>
+                
+                <div class="diagnosis">
+                  
+                  <div><strong>Killing blow:</strong> <span class="ability">Sculpting Hex</span></div>
+                  
+                  
+                  <div><strong>Likely root cause:</strong> Second spread overlap was not spaced correctly.</div>
+                  
+                  
+                  <div><strong>Classification:</strong> <span class="classification classification-assignment-soak-failure">assignment/soak failure</span></div>
+                  
+                  
+                  <div><strong>Why:</strong> The death happened during an overlap that should have been handled by positioning and personals.</div>
+                  
+                </div>
+                
+              </li>
+              
+            </ul>
+            
+          </div>
+        </div>
+      
+        <div class="cause-card severity-recurring" data-collapsed="true">
+          <div class="cause-header" onclick="toggleCard(this)">
+            <div>
+              <span class="cause-title"><span class="ability">Gorging Swarm</span></span>
+              <div style="font-size: 12px; color: var(--text-dim); margin-top: 4px;">
+                Pulls: 3, 6, 8, 10
+              </div>
+            </div>
+            <div class="cause-count">6 deaths</div>
+          </div>
+          <div class="cause-body">
+            
+            <p><strong>Mechanic:</strong> Tank-swap stacking debuff. Swap at 3 stacks.</p>
+            
+            
+            <p><strong>Pattern:</strong> Swap timing slipped during long pulls.</p>
+            
+            
+            <p><strong>Individual deaths:</strong></p>
+            <ul class="death-list">
+              
+              <li class="death-item">
+                <div>
+                  <span class="player-class-Warrior">Alice</span>
+                  <span class="timestamp">&middot; Pull 3 &middot; 2:01</span>
+                </div>
+                <div class="death-context">Held at 4 stacks.</div>
+                
+                <div class="diagnosis">
+                  
+                  <div><strong>Killing blow:</strong> <span class="ability">Gorging Swarm</span></div>
+                  
+                  
+                  <div><strong>Likely root cause:</strong> Tank swap was late and the stack count rolled too high.</div>
+                  
+                  
+                  <div><strong>Classification:</strong> <span class="classification classification-assignment-soak-failure">assignment/soak failure</span></div>
+                  
+                  
+                  <div><strong>Why:</strong> The lethal hit followed a missed swap responsibility rather than a healer throughput miss.</div>
+                  
+                </div>
+                
+              </li>
+              
+            </ul>
+            
+          </div>
+        </div>
+      
+    </section>
+
+    
+    <section class="publish-links">
+      <h2>Published report</h2>
+      <div class="publish-grid">
+        
+        <a class="publish-link" href="https://example.github.io/reports/queen-ansurek/report.html">
+          <span class="publish-label">Report</span>
+          <span class="publish-url">https://example.github.io/reports/queen-ansurek/report.html</span>
+        </a>
+        
+        
+        <a class="publish-link" href="https://example.github.io/">
+          <span class="publish-label">Index</span>
+          <span class="publish-url">https://example.github.io/</span>
+        </a>
+        
+        
+        <a class="publish-link" href="https://example.github.io/cards/queen-ansurek-report.png">
+          <span class="publish-label">Summary card</span>
+          <span class="publish-url">https://example.github.io/cards/queen-ansurek-report.png</span>
+        </a>
+        
+      </div>
+    </section>
+    
+
+    <section class="timeline">
+      <h2>Timeline across pulls</h2>
+      
+      
+      <div class="timeline-row">
+        <div class="timeline-label">Pull 1</div>
+        <div class="timeline-bar">
+          
+          <div class="death-marker"
+               style="left: 25.0%;"
+               title="Nemo — Sculpting Hex"></div>
+          
+        </div>
+      </div>
+      
+      <div class="timeline-row">
+        <div class="timeline-label">Pull 2</div>
+        <div class="timeline-bar">
+          
+          <div class="death-marker"
+               style="left: 23.5%;"
+               title="Nemo — Sculpting Hex"></div>
+          
+          <div class="death-marker"
+               style="left: 60.0%;"
+               title="Bob — Gorging Swarm"></div>
+          
+        </div>
+      </div>
+      
+    </section>
+
+    <section class="per-player">
+      <h2>Per-player breakdown</h2>
+      
+      
+      <div class="cause-card" data-collapsed="true">
+        <div class="cause-header" onclick="toggleCard(this)">
+          <div>
+            <span class="player-class-Rogue">Nemo</span>
+            <span style="color: var(--text-dim); font-size: 12px;"> (Rogue)</span>
+          </div>
+          <div class="cause-count">7 deaths</div>
+        </div>
+        <div class="cause-body">
+            <ul>
+            
+            <li>
+              <span class="timestamp">Pull 2 &middot; 0:47</span>
+              &middot; <span class="ability">Sculpting Hex</span>
+              
+              <br><span style="color: var(--text-dim);">In melee cluster</span>
+            </li>
+            
+            <li>
+              <span class="timestamp">Pull 4 &middot; 1:12</span>
+              &middot; <span class="ability">Sculpting Hex</span>
+              
+              
+            </li>
+            
+          </ul>
+        </div>
+      </div>
+      
+    </section>
+
+    <section class="recommendations">
+      <h2>Recommendations</h2>
+      
+      <ol>
+        
+        <li>Reassign melee positioning on Sculpting Hex — have rogues/DHs move out by 6 yards.</li>
+        
+        <li>Change Gorging Swarm tank swap to trigger at 3 stacks, not 4.</li>
+        
+        <li>Preassign Infest soakers before pulls reach P3.</li>
+        
+      </ol>
+    </section>
+
+    <footer class="report-footer">
+      Generated by Warcraft Wipe Checker &middot;
+      <a href="https://www.warcraftlogs.com/reports/abc123" style="color: var(--accent);">View raw log on Warcraft Logs</a>
+    </footer>
+  </div>
+
+  <script>
+    function toggleCard(header) {
+      const card = header.closest(".cause-card");
+      const collapsed = card.getAttribute("data-collapsed") === "true";
+      card.setAttribute("data-collapsed", collapsed ? "false" : "true");
+    }
+  </script>
+</body>
+</html>
